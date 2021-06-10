@@ -107,23 +107,23 @@ WSGI_APPLICATION = 'socialie.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': str(BASE_DIR / 'db.sqlite3'),
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'Socialie',
-        'HOST': 'localhost',
-        'PORT': '3306',
-        'USER': 'django',
-        'PASSWORD': 'django-user-password',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': str(BASE_DIR / 'db.sqlite3'),
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'Socialie',
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#         'USER': 'django',
+#         'PASSWORD': 'django-user-password',
+#     }
+# }
    
 # DATABASES = {
 #     'default': {
