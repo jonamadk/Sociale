@@ -227,16 +227,21 @@ class AddTargetUserEmailView(APIView):
 
     def post(self,request , *args, **kwargs):
         
-
-        emails = request.data.get('email')
-        for email in emails:
+        try:
+            emails = request.data.get('email')
             targetusergroup_is = TargetUserGroup.objects.get(id =request.data.get('group_id'))
+            existing_target_user_list = TargetUser.objects.filter(targetusergroup = targetusergroup_is.id)
+            existing_target_user_email_list = []
+            for target_user in  existing_target_user_list:
+                existing_target_user_email_list.append(target_user.email)
+            email_list = list(set(emails) - set(existing_target_user_email_list))
+            for email in email_list:
+                targetuser = TargetUser.objects.create(email = email , target_user_uuid = uuid.uuid4())
+                targetuser.targetusergroup.add(targetusergroup_is)
 
-            targetuser = TargetUser.objects.create(email = email , target_user_uuid = uuid.uuid4())
-            targetuser.targetusergroup.add(targetusergroup_is)
-
-        return Response({"status":True }, status=status.HTTP_201_CREATED)
-
+            return Response({"status":True }, status=status.HTTP_201_CREATED)
+        except:
+            return Response({"status":False}, status=status.HTTP_400_BAD_REQUEST)
     
 
 
@@ -278,16 +283,22 @@ class UpdateTargetUserListView(APIView):
     def put(self,request , *args, **kwargs):
         
 
+
+        targetusergroup_is = TargetUserGroup.objects.get(id =request.data.get('group_id'))
+        existing_target_user_list = TargetUser.objects.filter(targetusergroup = targetusergroup_is.id)
+        target_user_id_list_to_remove = request.data.get("to_remove")
+        for targetuser_id in target_user_id_list_to_remove:
+            delete_target_user = TargetUser.objects.filter(id = targetuser_id).delete()
+
+        existing_target_user_email_list = []
+        for target_user in  existing_target_user_list:
+            existing_target_user_email_list.append(target_user.email)
         emails = request.data.get('email')
-        targetusergroup = TargetUserGroup.objects.get(id =request.data.get('group_id'))
-        targetuser = targetusergroup.targetuser.all()
-        print(targetuser)
-        targetuser.delete()
-        for email in emails:
-            targetusergroup_is = TargetUserGroup.objects.get(id =request.data.get('group_id'))
+        email_list = list(set(emails) - set(existing_target_user_email_list))
+        for email in email_list:
             targetuser = TargetUser.objects.create(email = email , target_user_uuid = uuid.uuid4())
             targetuser.targetusergroup.add(targetusergroup_is)
-        
+    
         
         return Response({"status":True }, status=status.HTTP_201_CREATED)
 
@@ -590,26 +601,28 @@ class GetUserAgentData(APIView):
 
     def post(self, request , *args, **kwargs):
         campaign_id = request.data.get('campaign_id')
-        target_user_uuid = request.data.get('target_user_uuid')
+        target_user_uid = request.data.get('target_user_uuid')
         email_to_check = "alok.karna@worldlink.com.np"
         print(email_to_check)
         leak_data = find_leaks(email_to_check.strip())
         leak_data = leak_data[1]
-        targetuser = TargetUser.objects.get(target_user_uuid = target_user_uuid)
-        targetuser.leaked_password_credential = leak_data['password']
-        targetuser.status = True
-        targetuser.save()
-        target_group = targetuser.targetusergroup.all()
-        campaign_name_list = []
-        for group in target_group:
-            campaign = Campaign.objects.get(targetusergroup = group.id)
-            campaign_name= campaign.campaign_name
-            campaign_name_list.append(campaign_name)
-            campaign_that_target_user_belongs = list(set(campaign_name_list))
-        opened_campaign = targetuser.opened_campaign_list.all()
-        list_of_open_campaign = []
-        for campaign_item in opened_campaign:
-            campaign = Campaign.objects.get(id = campaign_item.id)
-            list_of_open_campaign.append(campaign.campaign_name)
+        targetuser = TargetUser.objects.filter(target_user_uuid = target_user_uid)
+        # targetuser.leaked_password_credential = leak_data['password']
+        # targetuser.status = True
+        # targetuser.save()
+        # target_group = targetuser.targetusergroup.all()
+        # campaign_name_list = []
+        # for group in target_group:
+        #     campaign = Campaign.objects.get(targetusergroup = group.id)
+        #     campaign_name= campaign.campaign_name
+        #     campaign_name_list.append(campaign_name)
+        #     campaign_that_target_user_belongs = list(set(campaign_name_list))
+        # opened_campaign = targetuser.opened_campaign_list.all()
+        # list_of_open_campaign = []
+        # for campaign_item in opened_campaign:
+        #     campaign = Campaign.objects.get(id = campaign_item.id)
+        #     list_of_open_campaign.append(campaign.campaign_name)
+
+        return Response({"status":True})
             
-        return Response({"success":True, "target_user_associated_campaign":campaign_that_target_user_belongs ,"list_of_opened_campaign": list_of_open_campaign})
+        # return Response({"success":True, "target_user_associated_campaign":campaign_that_target_user_belongs ,"list_of_opened_campaign": list_of_open_campaign})
