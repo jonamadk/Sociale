@@ -138,6 +138,7 @@ class HideCampaignView(APIView):
         return Response({"success":True}, status=status.HTTP_200_OK)
 
 
+
 class UnHideCampaignView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -158,8 +159,6 @@ class DeleteCamapaignView(APIView):
         campaign = Campaign.objects.get(id = request.data.get('campaign_id'))
         campaign.delete()
         return Response({"success":True}, status=status.HTTP_200_OK)
-
-
 
 
 
@@ -219,7 +218,6 @@ class UpdateTargetUserGroupView(generics.UpdateAPIView):
 
 
 
-
 class AddTargetUserEmailView(APIView):
 
     authentication_classes = [TokenAuthentication]
@@ -269,9 +267,6 @@ class GetTargetUserGroupFromOrganizationView(APIView):
         targetusergroup = TargetUserGroup.objects.filter(organization = request.data.get('organization'))
         serializer = GetTargetUserGroupSerializer(targetusergroup , many = True)
         return Response({"status":True, "payload":serializer.data})
-
-
-
 
 
     
@@ -493,8 +488,6 @@ def image_load(request,targetuser_uuid, camp_id):
 
 
 
-
-
 class CheckPawnPassword(APIView):
 
     authentication_classes = [TokenAuthentication]
@@ -599,30 +592,44 @@ class ValidateTemplate(APIView):
 
 class GetUserAgentData(APIView):
 
+    '''
+    Pefrom target user email leak , trace campaign and email opened status
+    dump explot data
+    '''
+
     def post(self, request , *args, **kwargs):
         campaign_id = request.data.get('campaign_id')
+        
         target_user_uid = request.data.get('target_user_uuid')
-        email_to_check = "alok.karna@worldlink.com.np"
-        print(email_to_check)
-        leak_data = find_leaks(email_to_check.strip())
-        leak_data = leak_data[1]
-        targetuser = TargetUser.objects.filter(target_user_uuid = target_user_uid)
-        # targetuser.leaked_password_credential = leak_data['password']
-        # targetuser.status = True
-        # targetuser.save()
-        # target_group = targetuser.targetusergroup.all()
-        # campaign_name_list = []
-        # for group in target_group:
-        #     campaign = Campaign.objects.get(targetusergroup = group.id)
-        #     campaign_name= campaign.campaign_name
-        #     campaign_name_list.append(campaign_name)
-        #     campaign_that_target_user_belongs = list(set(campaign_name_list))
-        # opened_campaign = targetuser.opened_campaign_list.all()
-        # list_of_open_campaign = []
-        # for campaign_item in opened_campaign:
-        #     campaign = Campaign.objects.get(id = campaign_item.id)
-        #     list_of_open_campaign.append(campaign.campaign_name)
-
-        return Response({"status":True})
-            
-        # return Response({"success":True, "target_user_associated_campaign":campaign_that_target_user_belongs ,"list_of_opened_campaign": list_of_open_campaign})
+        # email_to_check = "alok.karna@worldlink.com.np"
+    
+        # leak_data = find_leaks(email_to_check.strip())
+        # leak_data = leak_data[1]
+        targetuser_is = TargetUser.objects.get(target_user_uuid = target_user_uid)
+        targetuser_is.opened_campaign_list.add(campaign_id)
+        # targetuser_is.leaked_password_credential = leak_data['password']
+        # targetuser_is.save()
+        campaign = Campaign.objects.get(id = campaign_id)
+        if targetuser_is.status==False:
+            initial_value = campaign.campaign_opened_count 
+            campaign.campaign_opened_count  = initial_value + 1
+            campaign.save()
+            targetuser_is.status = True
+            targetuser_is.save()
+        target_group= targetuser_is.targetusergroup.all()
+        campaign_name_list = []
+        for group in target_group:
+            print(group.id)
+            campaign_list= Campaign.objects.filter(targetusergroup = group.id)
+            for campaign in campaign_list:
+                campaign = Campaign.objects.get(id = campaign.id)
+                campaign_name= campaign.campaign_name
+                campaign_name_list.append(campaign_name)
+                campaign_that_target_user_belongs = list(set(campaign_name_list))
+        print(campaign_that_target_user_belongs)
+        opened_campaign = targetuser_is.opened_campaign_list.all()
+        list_of_open_campaign = []
+        for campaign_item in opened_campaign:
+            campaign = Campaign.objects.get(id = campaign_item.id)
+            list_of_open_campaign.append(campaign.campaign_name)       
+        return Response({"success":True, "target_user_associated_campaign":campaign_that_target_user_belongs ,"list_of_opened_campaign": list_of_open_campaign})
