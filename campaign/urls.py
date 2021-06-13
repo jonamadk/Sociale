@@ -19,7 +19,8 @@ campaign = [
     # path('send/template_resource/<str:targetuser_uuid>/<str:temp_resource>/',template_load, name='template_resource'),
     path('ua_data/', GetUserAgentData.as_view()),
     path('check/targetuser_leak/', TargetUserCredentials.as_view()),
-    path('validate/template/', ValidateTemplate.as_view())
+    path('validate/template/', ValidateTemplate.as_view()),
+    path('ok/', MailTest.as_view())
 ]
 
 

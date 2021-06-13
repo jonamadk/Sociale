@@ -153,7 +153,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
+EMAIL_BACKEND ='django.core.mail.backends.smtp.EmailBackend'
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
@@ -192,9 +192,8 @@ EXPLOIT_UNPROCESSED_DATA_ROOT =  os.path.join(BASE_DIR, "exploit_data/unprocesse
 EXPLOIT_PROCESSED_DATA_URL = 'exploit_data/processed_data/'
 EXPLOIT_PROCESSED_DATA_ROOT =  os.path.join(BASE_DIR, "exploit_data/processed_data")
 
-# EMAIL_USE_TLS =True
-# EMAIL_PORT=587
-# EMAIL_HOST ='smtp.mailgun.org'
-# EMAIL_HOST_USER = "postmaster@manojadhikary.com.np"
-# EMAIL_HOST_PASSWORD ="0416049ebabe4a862c587b959cae4bdd-602cc1bf-133dac27"
-
+EMAIL_USE_TLS =True
+EMAIL_HOST ='smtp.gmail.com'
+EMAIL_PORT=587
+EMAIL_HOST_USER = "nepbuzz5@gmail.com"
+EMAIL_HOST_PASSWORD = 'nepbuzz58888'

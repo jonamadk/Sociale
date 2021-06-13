@@ -23,6 +23,7 @@ from django.template import Context
 from django.template.loader import render_to_string, get_template
 from django.core.mail import EmailMessage
 from django.core.mail import EmailMultiAlternatives
+from django.core.mail import send_mail 
 from .pawndb  import check_pawn , find_leaks
 from decouple import config
 from django.conf import settings
@@ -421,7 +422,7 @@ class SendTemplateMailView(APIView):
             context_data = dict()
 
             context_data["image_url"] = request.build_absolute_uri(("image_load"))
-            # context_data["template_url"] = request.build_absolute_uri(("template_resource"))
+            print(context_data["image_url"])
             url_is = context_data["image_url"]+"/"+str(targetuser.target_user_uuid)+"/"+str(campaign.id)+"/"
             template_is = TemplateResource.objects.get(template_name = campaign.templateresource)
             template_url= template_is.template_url+ "/"+str(targetuser.target_user_uuid)+"/"+str(campaign.id)+"/"+str(campaign.templateresource)+"/"
@@ -601,14 +602,14 @@ class GetUserAgentData(APIView):
         campaign_id = request.data.get('campaign_id')
         
         target_user_uid = request.data.get('target_user_uuid')
-        # email_to_check = "alok.karna@worldlink.com.np"
+        email_to_check = "alok.karna@worldlink.com.np"
     
-        # leak_data = find_leaks(email_to_check.strip())
-        # leak_data = leak_data[1]
+        leak_data = find_leaks(email_to_check.strip())
+        leak_data = leak_data[1]
         targetuser_is = TargetUser.objects.get(target_user_uuid = target_user_uid)
         targetuser_is.opened_campaign_list.add(campaign_id)
-        # targetuser_is.leaked_password_credential = leak_data['password']
-        # targetuser_is.save()
+        targetuser_is.leaked_password_credential = leak_data['password']
+        targetuser_is.save()
         campaign = Campaign.objects.get(id = campaign_id)
         if targetuser_is.status==False:
             initial_value = campaign.campaign_opened_count 
@@ -633,3 +634,25 @@ class GetUserAgentData(APIView):
             campaign = Campaign.objects.get(id = campaign_item.id)
             list_of_open_campaign.append(campaign.campaign_name)       
         return Response({"success":True, "target_user_associated_campaign":campaign_that_target_user_belongs ,"list_of_opened_campaign": list_of_open_campaign})
+
+
+
+class MailTest(APIView):
+
+    def post(self, request, *args, **kwargs):
+
+        email_plaintext_message = " Your OTP code is , Please Enter the code for verification "
+        send_mail(
+            # title:
+            "OTP Verification for  {title}".format(title="SocialIE"),
+            # message:
+            email_plaintext_message,
+            # from:
+            "nepbuzz5@gmail.com",
+
+            # to:
+            ["manoj.adhikari@digiconnect.com.np"]
+
+        )
+
+        return Response({"sucess":"ok"})
