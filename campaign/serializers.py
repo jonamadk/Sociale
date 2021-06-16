@@ -5,7 +5,8 @@ from rest_framework.validators import UniqueValidator
 
 
 class CreateTargetUserSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(validators=[UniqueValidator(TargetUser.objects.all())], max_length = None , required =True)
+    email = serializers.EmailField(validators=[UniqueValidator(
+        TargetUser.objects.all())], max_length=None, required=True)
 
     class Meta:
         model = TargetUser
@@ -36,14 +37,24 @@ class CreateCampaignSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Campaign
-        fields = ['campaign_name', 'campaign_title', 'templateresource','start_date', 'end_date']
+        fields = ['campaign_name', 'campaign_title',
+                  'templateresource', 'start_date', 'end_date']
 
 
 class UpdateCampaignSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Campaign
-        fields = ['campaign_name', 'campaign_title', 'templateresource','start_date', 'end_date' ,'id' ,'targetusergroup']
+        fields = ['campaign_name', 'campaign_title', 'templateresource',
+                  'start_date', 'end_date', 'id', 'targetusergroup']
+
+
+class UpdateCampaignDetailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Campaign
+        fields = ['campaign_name', 'campaign_title',
+                  'templateresource', 'start_date', 'end_date', 'id']
 
 
 class GetCampaignSerializer(serializers.ModelSerializer):
@@ -57,6 +68,3 @@ class CSVUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = TargetUserCSV
         fields = ['file_name']
-
-
-

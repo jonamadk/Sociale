@@ -29,7 +29,7 @@ class Campaign(models.Model):
     end_date = models.CharField(max_length=240, blank=True, null=True)
     user = models.ForeignKey(UserModel, on_delete=models.CASCADE)
     targetusergroup = models.ManyToManyField(TargetUserGroup, related_name='campaign')
-    target_users_mail_list = models.TextField()
+    target_users_mail_list = models.TextField(blank=True, null=True)
     campaign_opened_count =models.IntegerField(default=0 , blank=True, null=False)
     hide_camapaign_status = models.BooleanField(default=False)
     campaign_schedule_status = models.BooleanField(default=False)

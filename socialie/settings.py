@@ -124,6 +124,18 @@ DATABASES = {
 #         'PASSWORD': 'django-user-password',
 #     }
 # }
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': config('DATABASE_NAME'),
+#         'HOST': config('DATABASE_HOST'),
+#         'PORT': config('DATABASE_PORT'),
+#         'USER': config('DATABASE_USER'),
+#         'PASSWORD': config('DATABASE_PASSWORD'),
+#     }
+# }
    
 # DATABASES = {
 #     'default': {
@@ -192,8 +204,3 @@ EXPLOIT_UNPROCESSED_DATA_ROOT =  os.path.join(BASE_DIR, "exploit_data/unprocesse
 EXPLOIT_PROCESSED_DATA_URL = 'exploit_data/processed_data/'
 EXPLOIT_PROCESSED_DATA_ROOT =  os.path.join(BASE_DIR, "exploit_data/processed_data")
 
-EMAIL_USE_TLS =True
-EMAIL_HOST ='smtp.gmail.com'
-EMAIL_PORT=587
-EMAIL_HOST_USER = "nepbuzz5@gmail.com"
-EMAIL_HOST_PASSWORD = 'nepbuzz58888'
