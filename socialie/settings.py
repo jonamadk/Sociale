@@ -27,7 +27,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG')
 CORS_ORIGIN_ALLOW_ALL = True
-ALLOWED_HOSTS = ['socialiehost.herokuapp.com','127.0.0.1']
+ALLOWED_HOSTS = ['119.13.100.46', '127.0.0.1']
 
 
 # Application definition
@@ -39,9 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',          
-    'user',                   #user django application
-    'phonenumber_field',      #Package for Phone Number Field
+    'rest_framework',
+    'user',  # user django application
+    'phonenumber_field',  # Package for Phone Number Field
     'template',
     'rest_framework.authtoken',
     'corsheaders',
@@ -50,18 +50,16 @@ INSTALLED_APPS = [
     'exploit_data.apps.ExploitDataConfig',
     'campaign',
 
-    
-     
+
+
 ]
-
-
 
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
     ],
-  
+
 }
 
 CRONTAB_COMMAND_SUFFIX = '2>&1'
@@ -81,7 +79,7 @@ MIDDLEWARE = [
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 ROOT_URLCONF = 'socialie.urls'
-AUTH_USER_MODEL = 'user.UserModel' #Adding the AbstractUserModel Auth UserModel
+AUTH_USER_MODEL = 'user.UserModel'  # Adding the AbstractUserModel Auth UserModel
 
 TEMPLATES = [
     {
@@ -98,7 +96,6 @@ TEMPLATES = [
         },
     },
 ]
-
 
 
 WSGI_APPLICATION = 'socialie.wsgi.application'
@@ -136,7 +133,7 @@ DATABASES = {
 #         'PASSWORD': config('DATABASE_PASSWORD'),
 #     }
 # }
-   
+
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
@@ -165,7 +162,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-EMAIL_BACKEND ='django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
@@ -192,15 +189,15 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 EMAIL_USE_TLS = config('EMAIL_USE_TLS')
 EMAIL_HOST = config('EMAIL_HOST')
-EMAIL_PORT =config('EMAIL_PORT')
+EMAIL_PORT = config('EMAIL_PORT')
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
 EXPLOIT_UNPROCESSED_DATA_URL = '/exploit_data/unprocessed_data/'
-EXPLOIT_UNPROCESSED_DATA_ROOT =  os.path.join(BASE_DIR, "exploit_data/unprocessed_data")
-
+EXPLOIT_UNPROCESSED_DATA_ROOT = os.path.join(
+    BASE_DIR, "exploit_data/unprocessed_data")
 
 
 EXPLOIT_PROCESSED_DATA_URL = 'exploit_data/processed_data/'
-EXPLOIT_PROCESSED_DATA_ROOT =  os.path.join(BASE_DIR, "exploit_data/processed_data")
-
+EXPLOIT_PROCESSED_DATA_ROOT = os.path.join(
+    BASE_DIR, "exploit_data/processed_data")
