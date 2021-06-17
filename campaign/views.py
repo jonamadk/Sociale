@@ -233,10 +233,29 @@ class DeleteTargetUserGroupView(APIView):
     def delete(self, request, *args, **kwargs):
 
         group = TargetUserGroup.objects.get(id=request.data.get('group_id'))
-        group.delete()
-        group.save()
+        group_id = group.id
 
-        return Response({"success": True}, status=status.HTTP_200_OK)
+        campaign_list = Campaign.objects.filter(targetusergroup=group_id)
+        if campaign_list.exists():
+
+            campaign_name_list = []
+            errormessage = {}
+            for campaign in campaign_list:
+                print("done")
+                print(campaign)
+                campaign_name = campaign.campaign_name
+                campaign_name_list.append(campaign_name)
+
+            errormessage["Cannot remove, since groups are used in following campaigns"] = campaign_name_list
+
+            return Response({"success": False, "msg": errormessage}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            # group = TargetUserGroup.objects.get(id=request.data.get('group_id')).delete()
+            group.delete()
+
+            return Response({"success": True, "msg": "successfully deleted"}, status=status.HTTP_200_OK)
+
+            # return Response({"success": True}, status=status.HTTP_200_OK)
 
 
 class AddTargetUserEmailView(APIView):
