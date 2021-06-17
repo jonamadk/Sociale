@@ -225,6 +225,20 @@ class UpdateTargetUserGroupView(generics.UpdateAPIView):
         return TargetUserGroup.objects.get(id=group_id)
 
 
+class DeleteTargetUserGroupView(APIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+
+        group = TargetUserGroup.objects.get(id=request.data.get('group_id'))
+        group.delete()
+        group.save()
+
+        return Response({"success": True}, status=status.HTTP_200_OK)
+
+
 class AddTargetUserEmailView(APIView):
 
     authentication_classes = [TokenAuthentication]
@@ -307,18 +321,6 @@ class UpdateTargetUserListView(APIView):
             targetuser.targetusergroup.add(targetusergroup_is)
 
         return Response({"status": True}, status=status.HTTP_201_CREATED)
-
-
-class DeleteTargetUserListView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def delete(self, request, *args, **kwargs):
-        targetusergroup = TargetUserGroup.objects.get(
-            id=request.data.get('group_id'))
-        targetuser = TargetUser.objects.filter(targetusergroup=targetusergroup)
-        targetusergroup.delete()
-        return Response({"sucees": True})
 
 
 class AddTemplateReceiverList(APIView):

@@ -30,7 +30,7 @@ group = [
     path('create/', CreateTargetUserGroupView.as_view()),
     path('get/', GetTargetUserGroupListView.as_view()),
     path('update/', UpdateTargetUserGroupView.as_view()),
-    path('delete/', DeleteTargetUserListView.as_view()),
+    path('delete/', DeleteTargetUserGroupView.as_view()),
     path('list/', GetTargetUserGroupFromOrganizationView.as_view())
 
 ]
