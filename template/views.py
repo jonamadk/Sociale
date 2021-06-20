@@ -144,6 +144,7 @@ class UpdateTemplateResourceView(APIView):
         '''
 
         serializer = TemplateResourceUpdateSerializer(data=request.data)
+        user = UserModel.objects.get(id=request.user.id)
         if serializer.is_valid():
             data = serializer.validated_data
             try:
@@ -159,6 +160,8 @@ class UpdateTemplateResourceView(APIView):
                 resource.headerNav2 = data.get("headerNav2")
                 resource.headerNav3 = data.get("headerNav3")
                 resource.bodyButtonColor = data.get("bodyButtonColor")
+
+                resource.user = user
 
                 resource.template_name = data.get("template_name")
 

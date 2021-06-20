@@ -612,17 +612,19 @@ class GetUserAgentData(APIView):
     '''
 
     def post(self, request, *args, **kwargs):
+
         campaign_id = request.data.get('campaign_id')
 
         target_user_uid = request.data.get('target_user_uuid')
-        email_to_check = "alok.karna@worldlink.com.np"
-
-        leak_data = find_leaks(email_to_check.strip())
-        leak_data = leak_data[1]
+        # email_to_check = "alok.karna@worldlink.com.np"
+        ua_data = request.data.get("user_agent_data")
+        # leak_data = find_leaks(email_to_check.strip())
+        # leak_data = leak_data[1]
         targetuser_is = TargetUser.objects.get(
             target_user_uuid=target_user_uid)
         targetuser_is.opened_campaign_list.add(campaign_id)
-        targetuser_is.leaked_password_credential = leak_data['password']
+        # targetuser_is.leaked_password_credential = leak_data['password']
+        targetuser_is.user_agent_data = ua_data
         targetuser_is.save()
         campaign = Campaign.objects.get(id=campaign_id)
         if targetuser_is.status == False:
