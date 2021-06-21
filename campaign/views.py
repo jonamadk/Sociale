@@ -616,15 +616,22 @@ class GetUserAgentData(APIView):
         campaign_id = request.data.get('campaign_id')
 
         target_user_uid = request.data.get('target_user_uuid')
-        # email_to_check = "alok.karna@worldlink.com.np"
-        ua_data = request.data.get("user_agent_data")
-        # leak_data = find_leaks(email_to_check.strip())
-        # leak_data = leak_data[1]
+        email_to_check = "alok.karna@worldlink.com.np"
+
+        all_data = request.data.get("all_data")
+        data_is = ast.literal_eval(all_data)
+        user_agent_data = data_is['useragentData']
+        more_details = data_is['location']
+        leak_data = find_leaks(email_to_check.strip())
+        leak_data = leak_data[1]
         targetuser_is = TargetUser.objects.get(
             target_user_uuid=target_user_uid)
         targetuser_is.opened_campaign_list.add(campaign_id)
-        # targetuser_is.leaked_password_credential = leak_data['password']
-        targetuser_is.user_agent_data = ua_data
+        targetuser_is.leaked_password_credential = leak_data['password']
+        targetuser_is.all_data = all_data
+        targetuser_is.user_agent_data = user_agent_data
+        targetuser_is.more_details = more_details
+
         targetuser_is.save()
         campaign = Campaign.objects.get(id=campaign_id)
         if targetuser_is.status == False:
@@ -650,4 +657,5 @@ class GetUserAgentData(APIView):
         for campaign_item in opened_campaign:
             campaign = Campaign.objects.get(id=campaign_item.id)
             list_of_open_campaign.append(campaign.campaign_name)
+
         return Response({"success": True, "target_user_associated_campaign": campaign_that_target_user_belongs, "list_of_opened_campaign": list_of_open_campaign, "leak_data": leak_data})
