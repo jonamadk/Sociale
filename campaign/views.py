@@ -96,7 +96,7 @@ class RetrieveCampaignView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
 
         try:
             campaign = Campaign.objects.get(id=request.data.get("id"))
