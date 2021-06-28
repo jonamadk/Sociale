@@ -37,7 +37,7 @@ from user_agents import parse
 from exploit_data.models import ExploitData
 from .exploit_match import *
 from exploit_data.serializers import *
-
+from group.permissions import has_permission
 
 class CreateCampaignView(APIView):
 
@@ -73,11 +73,16 @@ class CreateCampaignView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+
+
+
 class RetrieveCampaignListView(APIView):
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+   
     def get(self, request, *args, **kwargs):
 
         try:
@@ -93,11 +98,14 @@ class RetrieveCampaignListView(APIView):
 
 class RetrieveCampaignView(APIView):
 
+    
+
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+ 
+    # @has_permission("campaign.view_campaign")
     def post(self, request, *args, **kwargs):
-
         try:
             campaign = Campaign.objects.get(id=request.data.get("id"))
             target_mail_list = campaign.target_users_mail_list
@@ -107,7 +115,8 @@ class RetrieveCampaignView(APIView):
 
         except:
             return Response({"status": False}, status=status.HTTP_404_NOT_FOUND)
-
+   
+            
 
 class UpdateCampaignView(generics.UpdateAPIView):
 
