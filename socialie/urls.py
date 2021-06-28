@@ -27,5 +27,5 @@ urlpatterns = [
     path('', include('group.urls')),
     path('', include('template.urls')),
     path('', include('campaign.urls')),
-    path('data/', include('exploit_data.urls')),
+    path('', include('exploit_data.urls')),
 ]+  static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

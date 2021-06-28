@@ -4,68 +4,61 @@ from django.contrib.auth.models import User
 from rest_framework.validators import UniqueValidator
 
 
-
-
 class UserSignupSerializer(serializers.ModelSerializer):
- 
 
-    email = serializers.EmailField(validators=[UniqueValidator(UserModel.objects.all())], max_length = None , required =True)
-    password = serializers.CharField(min_length = 8, max_length = None, write_only=True)
-    
+    email = serializers.EmailField(validators=[UniqueValidator(
+        UserModel.objects.all())], max_length=None, required=True)
+    password = serializers.CharField(
+        min_length=8, max_length=None, write_only=True)
+
     class Meta:
         model = UserModel
-        fields = ['username', 'email', 'password','phonenumber','first_name', 'last_name','id',]
-     
+        fields = ['username', 'email', 'password', 'phonenumber',
+                  'first_name', 'last_name', 'id']
 
-  
-        
 
 class UserSigninSerizalizer(serializers.ModelSerializer):
 
-  
     class Meta:
-        model = UserModel 
-        fields = [ 'email','password']
-
-
+        model = UserModel
+        fields = ['email', 'password']
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
-    
-    email = serializers.EmailField(validators=[UniqueValidator(UserModel.objects.all())], max_length = None , required =True)
+
+    email = serializers.EmailField(validators=[UniqueValidator(
+        UserModel.objects.all())], max_length=None, required=True)
 
     class Meta:
         model = UserModel
-        fields = ['username', 'email','phonenumber','first_name', 'last_name','id']
+        fields = ['username', 'email', 'phonenumber',
+                  'first_name', 'last_name', 'id']
 
 
-
-        
 class UserPasswordUpdateSerializer(serializers.ModelSerializer):
 
-    new_password = serializers.CharField(min_length = 8, max_length = None, write_only=True)
+    new_password = serializers.CharField(
+        min_length=8, max_length=None, write_only=True)
 
     class Meta:
         model = UserModel
         fields = ['new_password']
 
 
-
 class UserPasswordResetSerializaer(serializers.ModelSerializer):
-    new_password = serializers.CharField(min_length = 8, max_length = None, write_only=True)
+    new_password = serializers.CharField(
+        min_length=8, max_length=None, write_only=True)
+
     class Meta:
         model = UserModel
-        fields = ["email" , "new_password"]
-
+        fields = ["email", "new_password"]
 
 
 class OTPSendMailSerializaer(serializers.ModelSerializer):
-   
+
     class Meta:
         model = UserModel
-        fields = ["email",]
-
-
+        fields = ["email", ]
 
 
 class OTPVerificationSerializer(serializers.ModelSerializer):
@@ -73,7 +66,7 @@ class OTPVerificationSerializer(serializers.ModelSerializer):
     class Meta:
 
         model = UserModel
-        fields = [ "email","otp_code"]
+        fields = ["email", "otp_code"]
 
 
 class UserGroupSerializer(serializers.ModelSerializer):
@@ -86,17 +79,16 @@ class UserGroupSerializer(serializers.ModelSerializer):
 
 class MultiFactorAuthenticationSerializer(serializers.ModelSerializer):
 
-    
-
     class Meta:
 
         model = UserModel
-        fields = ["email_two_factor_auth","totp_two_factor_auth", "email_and_sms_two_factor_auth"]
+        fields = ["email_two_factor_auth", "totp_two_factor_auth",
+                  "email_and_sms_two_factor_auth"]
 
 
 class DisableMultiFactorSerializer(serializers.ModelSerializer):
 
-    status = serializers.BooleanField(default = False)
+    status = serializers.BooleanField(default=False)
 
     class Meta:
 

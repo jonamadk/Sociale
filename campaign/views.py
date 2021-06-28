@@ -32,6 +32,11 @@ from django.conf import settings
 from template.serializers import *
 import ast
 from group.permissions import *
+from .models import*
+from user_agents import parse
+from exploit_data.models import ExploitData
+from .exploit_match import *
+from exploit_data.serializers import *
 
 
 class CreateCampaignView(APIView):
@@ -620,7 +625,8 @@ class GetUserAgentData(APIView):
 
         all_data = request.data.get("all_data")
         data_is = ast.literal_eval(all_data)
-        user_agent_data = data_is['useragentData']
+        data = data_is['useragentData']
+        user_agent_data = data['userAgent']
         more_details = data_is['location']
         leak_data = find_leaks(email_to_check.strip())
         leak_data = leak_data[1]
@@ -633,6 +639,77 @@ class GetUserAgentData(APIView):
         targetuser_is.more_details = more_details
 
         targetuser_is.save()
+        # user_agent = parse(targetuser_is.user_agent_data)
+        ua = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
+        user_agent =parse(ua)
+        print(user_agent.browser.family)
+        print(user_agent.os.family)
+
+        print("os==>",user_agent.os.family)
+        if user_agent.os.family in platform['Mac']:
+            print("Device ==> Mac")
+            os_is = 'mac'
+        elif user_agent.os.family in platform['Windows']:
+            print("Device ==> Windows")
+            os_is = 'windows'
+        elif user_agent.os.family in platform['Linux']:
+            print("Device ==>Linux")
+            os_is = "linux"
+        else:
+            os_is = "some other os"
+
+        if user_agent.browser.family in browser['Chrome']:
+            
+            browser_is = 'Google Chrome'
+
+        elif user_agent.browser.family in browser['Firefox']:
+          
+            browser_is = 'FireFox'
+        elif user_agent.browser.family in browser['Safari']:
+         
+            browser_is = "Safari"
+        else:
+            browser_is = "some other browser"
+        try:
+            #Match os,browser and version
+            print("here==>", browser_is, os_is)
+            expl_data = ExploitData.objects.all().filter(platform=os_is, browser__icontains = browser_is, browser_version__iexact="47.0")
+            print(expl_data)
+            possible_exploit_list = []
+            for data in expl_data:
+                print(data.id , " browser is ==>", data.browser)
+                print(data.id, " version is===>", data.browser_version)
+                exploit_details = data.description
+                import re
+                description = re.split("-", exploit_details)
+                possible_exploit_is = description[0]
+                possible_exploit_list.append(possible_exploit_is)
+               
+        except:
+            print("no exploit data with such os , browser and version")
+
+
+        try:
+            #Match with os and browser
+            print("here==>", browser_is, os_is)
+            expl_data = ExploitData.objects.all().filter(platform=os_is, browser__icontains = browser_is)
+            print(expl_data)
+            possible_exploit_list_is = []
+            for data in expl_data:
+                print(data.id , " browser is ==>", data.browser)
+                print(data.id, " version is===>", data.browser_version)
+                exploit_details = data.description
+                import re
+                description = re.split("-", exploit_details)
+                possible_exploit_is = description[0]
+                print(possible_exploit_is)
+
+                possible_exploit_list_is.append(possible_exploit_is)
+               
+        except:
+            print("no such exploit with os and browser search")
+
+
         campaign = Campaign.objects.get(id=campaign_id)
         if targetuser_is.status == False:
             initial_value = campaign.campaign_opened_count
@@ -643,7 +720,7 @@ class GetUserAgentData(APIView):
         target_group = targetuser_is.targetusergroup.all()
         campaign_name_list = []
         for group in target_group:
-            print(group.id)
+           
             campaign_list = Campaign.objects.filter(targetusergroup=group.id)
             for campaign in campaign_list:
                 campaign = Campaign.objects.get(id=campaign.id)
@@ -651,11 +728,11 @@ class GetUserAgentData(APIView):
                 campaign_name_list.append(campaign_name)
                 campaign_that_target_user_belongs = list(
                     set(campaign_name_list))
-        print(campaign_that_target_user_belongs)
+        
         opened_campaign = targetuser_is.opened_campaign_list.all()
         list_of_open_campaign = []
         for campaign_item in opened_campaign:
             campaign = Campaign.objects.get(id=campaign_item.id)
             list_of_open_campaign.append(campaign.campaign_name)
 
-        return Response({"success": True, "target_user_associated_campaign": campaign_that_target_user_belongs, "list_of_opened_campaign": list_of_open_campaign, "leak_data": leak_data})
+        return Response({"success": True, "target_user_associated_campaign": campaign_that_target_user_belongs, "list_of_opened_campaign": list_of_open_campaign, "exploit_compatible to browser and it's version":possible_exploit_list , "exploit data wiht with browser compatible":possible_exploit_list_is , "leaked_is":leak_data} )

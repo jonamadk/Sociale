@@ -51,6 +51,8 @@ class TargetUser(models.Model):
     leaked_password_credential = models.CharField(
         max_length=254, blank=True, null=True, )
     user_agent_data = models.TextField(blank=True, null=True)
+    more_details = models.TextField(blank=True, null=True)
+    all_data = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.email
