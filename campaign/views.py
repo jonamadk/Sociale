@@ -100,8 +100,10 @@ class RetrieveCampaignView(APIView):
 
         try:
             campaign = Campaign.objects.get(id=request.data.get("id"))
+            target_mail_list = campaign.target_users_mail_list
+            target_mail_list = ast.literal_eval(target_mail_list)
             searializer = GetCampaignSerializer(campaign)
-            return Response({"status": True, "payload": searializer.data})
+            return Response({"status": True, "payload": searializer.data, "mail_list":target_mail_list})
 
         except:
             return Response({"status": False}, status=status.HTTP_404_NOT_FOUND)
@@ -204,6 +206,9 @@ class CreateTargetUserGroupView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+
+
 class GetTargetUserGroupListView(generics.ListAPIView):
 
     authentication_classes = [TokenAuthentication]
@@ -211,7 +216,7 @@ class GetTargetUserGroupListView(generics.ListAPIView):
 
     queryset = TargetUserGroup.objects.all()
     serializer_class = GetTargetUserGroupSerializer
-
+    
     def get_object(self):
         user = UserModel.objects.get(id=self.request.user.id)
         return TargetUserGroup.objects.get(user=user)

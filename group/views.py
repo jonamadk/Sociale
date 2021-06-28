@@ -53,7 +53,7 @@ class GetUserGroupList(generics.ListAPIView):
 
     '''
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminUser, DjangoModelPermissions]
+    permission_classes = [IsAuthenticated, IsAdminUser]
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     
@@ -67,7 +67,7 @@ class GroupUpdateView(generics.UpdateAPIView):
         Only System Admin can Update Group data
     '''
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminUser, DjangoModelPermissions]
+    permission_classes = [IsAuthenticated, IsAdminUser]
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
@@ -82,7 +82,7 @@ class GroupDeleteView(generics.DestroyAPIView):
     '''
     
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminUser, DjangoModelPermissions]
+    permission_classes = [IsAuthenticated, IsAdminUser]
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
@@ -93,7 +93,7 @@ class GroupDeleteView(generics.DestroyAPIView):
 class GetPermissionsList(generics.ListAPIView):
 
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminUser, DjangoModelPermissions]
+    permission_classes = [IsAuthenticated, IsAdminUser]
     queryset = Permission.objects.all()
     serializer_class = PermissionSerializer
 
