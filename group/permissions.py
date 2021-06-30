@@ -5,7 +5,6 @@ from rest_framework.response import Response
 from django.core.exceptions import PermissionDenied
 
 
-
 def has_permission(permission):
     def has_permission_decorator(func):
         @wraps(func)

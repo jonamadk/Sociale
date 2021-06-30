@@ -39,11 +39,13 @@ from .exploit_match import *
 from exploit_data.serializers import *
 from group.permissions import has_permission
 
+
 class CreateCampaignView(APIView):
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    @has_permission('campaign.add_campaign')
     def post(self, request, *args, **kwargs):
 
         serializer = CreateCampaignSerializer(data=request.data)
@@ -73,16 +75,12 @@ class CreateCampaignView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-
-
-
 class RetrieveCampaignListView(APIView):
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-   
+    @has_permission('campaign.view_campaign')
     def get(self, request, *args, **kwargs):
 
         try:
@@ -96,32 +94,37 @@ class RetrieveCampaignListView(APIView):
             return Response({"status": False}, status=status.HTTP_404_NOT_FOUND)
 
 
-class RetrieveCampaignView(APIView):
+class RetrieveAllCampaignsFromOrganization(generics.ListAPIView):
 
-    
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
+
+    queryset = Campaign.objects.all()
+    serializer_class = GetCampaignSerializer
+
+
+class RetrieveCampaignView(APIView):
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
- 
-    # @has_permission("campaign.view_campaign")
+    @has_permission("campaign.view_campaign")
     def post(self, request, *args, **kwargs):
         try:
             campaign = Campaign.objects.get(id=request.data.get("id"))
             target_mail_list = campaign.target_users_mail_list
             target_mail_list = ast.literal_eval(target_mail_list)
             searializer = GetCampaignSerializer(campaign)
-            return Response({"status": True, "payload": searializer.data, "mail_list":target_mail_list})
+            return Response({"status": True, "payload": searializer.data, "mail_list": target_mail_list})
 
         except:
             return Response({"status": False}, status=status.HTTP_404_NOT_FOUND)
-   
-            
+
 
 class UpdateCampaignView(generics.UpdateAPIView):
 
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
 
     queryset = Campaign.objects.all()
     serializer_class = UpdateCampaignSerializer
@@ -134,7 +137,7 @@ class UpdateCampaignView(generics.UpdateAPIView):
 class UpdateCampaignDetailView(generics.UpdateAPIView):
 
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
 
     queryset = Campaign.objects.all()
     serializer_class = UpdateCampaignDetailSerializer
@@ -149,6 +152,7 @@ class UpdateCampaignMailListView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    @has_permission('campaign.change_campaign')
     def put(self, request, *args, **kwargs):
         campaign = Campaign.objects.get(id=request.data.get('id'))
         campaign.target_users_mail_list = request.data.get(
@@ -162,6 +166,7 @@ class HideCampaignView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    
     def post(self, request, *args, **kwargs):
 
         campaign = Campaign.objects.get(id=request.data.get('campaign_id'))
@@ -175,6 +180,7 @@ class UnHideCampaignView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+   
     def post(self, request, *args, **kwargs):
 
         campaign = Campaign.objects.get(id=request.data.get('campaign_id'))
@@ -187,7 +193,8 @@ class DeleteCamapaignView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def delete(self, requst, *args, **kwargs):
+    @has_permission('campaign.delete_campaign')
+    def delete(self, request, *args, **kwargs):
         campaign = Campaign.objects.get(id=request.data.get('campaign_id'))
         campaign.delete()
         return Response({"success": True}, status=status.HTTP_200_OK)
@@ -198,6 +205,7 @@ class CreateTargetUserGroupView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    @has_permission('campaign.add_targetusergroup')
     def post(self, request, *args, **kwargs):
         serializer = CreateTargetUserGroupSerializer(data=request.data)
         if serializer.is_valid():
@@ -215,18 +223,24 @@ class CreateTargetUserGroupView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-
-
 class GetTargetUserGroupListView(generics.ListAPIView):
+
+    '''
+
+    Returns the list of the target-user group 
+
+    according to the user
+
+    '''
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     queryset = TargetUserGroup.objects.all()
     serializer_class = GetTargetUserGroupSerializer
-    
+
     def get_object(self):
+
         user = UserModel.objects.get(id=self.request.user.id)
         return TargetUserGroup.objects.get(user=user)
 
@@ -245,6 +259,12 @@ class UpdateTargetUserGroupView(generics.UpdateAPIView):
 
 
 class DeleteTargetUserGroupView(APIView):
+
+    '''
+    Deletes the target-user group if group is not
+    associated in any campaign
+
+    '''
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -655,11 +675,11 @@ class GetUserAgentData(APIView):
         targetuser_is.save()
         # user_agent = parse(targetuser_is.user_agent_data)
         ua = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
-        user_agent =parse(ua)
+        user_agent = parse(ua)
         print(user_agent.browser.family)
         print(user_agent.os.family)
 
-        print("os==>",user_agent.os.family)
+        print("os==>", user_agent.os.family)
         if user_agent.os.family in platform['Mac']:
             print("Device ==> Mac")
             os_is = 'mac'
@@ -673,44 +693,45 @@ class GetUserAgentData(APIView):
             os_is = "some other os"
 
         if user_agent.browser.family in browser['Chrome']:
-            
+
             browser_is = 'Google Chrome'
 
         elif user_agent.browser.family in browser['Firefox']:
-          
+
             browser_is = 'FireFox'
         elif user_agent.browser.family in browser['Safari']:
-         
+
             browser_is = "Safari"
         else:
             browser_is = "some other browser"
         try:
-            #Match os,browser and version
+            # Match os,browser and version
             print("here==>", browser_is, os_is)
-            expl_data = ExploitData.objects.all().filter(platform=os_is, browser__icontains = browser_is, browser_version__iexact="47.0")
+            expl_data = ExploitData.objects.all().filter(
+                platform=os_is, browser__icontains=browser_is, browser_version__iexact="47.0")
             print(expl_data)
             possible_exploit_list = []
             for data in expl_data:
-                print(data.id , " browser is ==>", data.browser)
+                print(data.id, " browser is ==>", data.browser)
                 print(data.id, " version is===>", data.browser_version)
                 exploit_details = data.description
                 import re
                 description = re.split("-", exploit_details)
                 possible_exploit_is = description[0]
                 possible_exploit_list.append(possible_exploit_is)
-               
+
         except:
             print("no exploit data with such os , browser and version")
 
-
         try:
-            #Match with os and browser
+            # Match with os and browser
             print("here==>", browser_is, os_is)
-            expl_data = ExploitData.objects.all().filter(platform=os_is, browser__icontains = browser_is)
+            expl_data = ExploitData.objects.all().filter(
+                platform=os_is, browser__icontains=browser_is)
             print(expl_data)
             possible_exploit_list_is = []
             for data in expl_data:
-                print(data.id , " browser is ==>", data.browser)
+                print(data.id, " browser is ==>", data.browser)
                 print(data.id, " version is===>", data.browser_version)
                 exploit_details = data.description
                 import re
@@ -719,10 +740,9 @@ class GetUserAgentData(APIView):
                 print(possible_exploit_is)
 
                 possible_exploit_list_is.append(possible_exploit_is)
-               
+
         except:
             print("no such exploit with os and browser search")
-
 
         campaign = Campaign.objects.get(id=campaign_id)
         if targetuser_is.status == False:
@@ -734,7 +754,7 @@ class GetUserAgentData(APIView):
         target_group = targetuser_is.targetusergroup.all()
         campaign_name_list = []
         for group in target_group:
-           
+
             campaign_list = Campaign.objects.filter(targetusergroup=group.id)
             for campaign in campaign_list:
                 campaign = Campaign.objects.get(id=campaign.id)
@@ -742,11 +762,11 @@ class GetUserAgentData(APIView):
                 campaign_name_list.append(campaign_name)
                 campaign_that_target_user_belongs = list(
                     set(campaign_name_list))
-        
+
         opened_campaign = targetuser_is.opened_campaign_list.all()
         list_of_open_campaign = []
         for campaign_item in opened_campaign:
             campaign = Campaign.objects.get(id=campaign_item.id)
             list_of_open_campaign.append(campaign.campaign_name)
 
-        return Response({"success": True, "target_user_associated_campaign": campaign_that_target_user_belongs, "list_of_opened_campaign": list_of_open_campaign, "exploit_compatible to browser and it's version":possible_exploit_list , "exploit data wiht with browser compatible":possible_exploit_list_is , "leaked_is":leak_data} )
+        return Response({"success": True, "target_user_associated_campaign": campaign_that_target_user_belongs, "list_of_opened_campaign": list_of_open_campaign, "exploit_compatible to browser and it's version": possible_exploit_list, "exploit data wiht with browser compatible": possible_exploit_list_is, "leaked_is": leak_data})

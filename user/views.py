@@ -73,8 +73,8 @@ class UserSignupView(APIView):
                                                 first_name=data.get(
                                                     'first_name'),
                                                 last_name=data.get('last_name')
-                                                
-                                                
+
+
                                                 )
                 token = Token.objects.create(user=user)
                 mfa_hash = MFHash.objects.create(user=user)
@@ -507,3 +507,29 @@ class OTPSendInUserEmail(APIView):
         except Exception as e:
 
             return Response({"message": "Email is not associated to account"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CheckUserState(APIView):
+
+    '''
+
+    Checks the local storage token with the request token 
+    and the username
+
+    '''
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+
+        token_is = request.data.get("token")
+        username_is = request.data.get("username")
+
+        request_user = request.user.username
+        token = Token.objects.get(user=request.user.id)
+
+        if request_user == username_is and token.key == token_is:
+            return Response({"success": True}, status=status.HTTP_200_OK)
+        else:
+            return Response({"suceess": False}, status=status.HTTP_400_BAD_REQUEST)

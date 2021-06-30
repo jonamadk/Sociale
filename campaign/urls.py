@@ -20,7 +20,8 @@ campaign = [
     path('check/targetuser_leak/', TargetUserCredentials.as_view()),
     path('validate/template/', ValidateTemplate.as_view()),
     path("update/detail/", UpdateCampaignDetailView.as_view()),
-    path("update/mail_list/", UpdateCampaignMailListView.as_view())
+    path("update/mail_list/", UpdateCampaignMailListView.as_view()),
+    path("list/", RetrieveAllCampaignsFromOrganization.as_view())
 
 
 ]

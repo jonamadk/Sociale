@@ -4,11 +4,8 @@ from user.models import UserModel
 
 
 class MFHash(models.Model):
-    mfa_hash = models.CharField(max_length = 50, null=True, blank=True)
+    mfa_hash = models.CharField(max_length=50, null=True, blank=True)
     user = models.OneToOneField(UserModel, on_delete=models.CASCADE)
-
 
     def __str__(self):
         return self.user.username
-
-    

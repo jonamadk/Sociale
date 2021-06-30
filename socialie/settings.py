@@ -27,7 +27,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG')
 CORS_ORIGIN_ALLOW_ALL = True
-ALLOWED_HOSTS = ['119.13.100.46', '127.0.0.1']
+ALLOWED_HOSTS = ['119.13.100.46:3000', '127.0.0.1']
 
 
 # Application definition
