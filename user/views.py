@@ -512,24 +512,28 @@ class OTPSendInUserEmail(APIView):
 class CheckUserState(APIView):
 
     '''
-
     Checks the local storage token with the request token 
     and the username
 
     '''
-
+    
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-
+    
     def post(self, request, *args, **kwargs):
 
         token_is = request.data.get("token")
         username_is = request.data.get("username")
 
-        request_user = request.user.username
-        token = Token.objects.get(user=request.user.id)
-
-        if request_user == username_is and token.key == token_is:
+        try:
+            token = Token.objects.get(key = token_is)
+            key = token.key
+            user = token.user
+        except:
+            return Response({"success":False}, status=status.HTTP_400_BAD_REQUEST)
+        
+  
+        if token_is == str(key) and username_is == str(user):
             return Response({"success": True}, status=status.HTTP_200_OK)
         else:
-            return Response({"suceess": False}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"suceess": False }, status=status.HTTP_400_BAD_REQUEST)
