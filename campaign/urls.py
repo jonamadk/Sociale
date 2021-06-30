@@ -21,7 +21,8 @@ campaign = [
     path('validate/template/', ValidateTemplate.as_view()),
     path("update/detail/", UpdateCampaignDetailView.as_view()),
     path("update/mail_list/", UpdateCampaignMailListView.as_view()),
-    path("list/", RetrieveAllCampaignsFromOrganization.as_view())
+    path("list/", RetrieveAllCampaignsFromOrganization.as_view()),
+    path("delete/", DeleteCamapaignView.as_view())
 
 
 ]
