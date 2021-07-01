@@ -5,7 +5,7 @@ from .views import *
 
 user_crud_patterns = [
     path("update/profile/", UserUpdateView.as_view()),
-    path("<int:pk>/delete/", UserDeleteView.as_view()),
+    path("delete/", UserDeleteView.as_view()),
     path("view/", UserRetrieveView.as_view()),
     path("update/password/", UserProfilePasswordUpdateView.as_view()),
     path("state/", CheckUserState.as_view())

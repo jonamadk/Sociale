@@ -13,4 +13,3 @@ class UserModel(AbstractUser):
         default=False, null=True, blank=True)
     email_and_sms_two_factor_auth = models.BooleanField(
         default=False, null=True, blank=True)
-    

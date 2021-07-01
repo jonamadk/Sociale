@@ -28,8 +28,6 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
     email = serializers.EmailField(validators=[UniqueValidator(
         UserModel.objects.all())], max_length=None, required=True)
-        
-    
 
     class Meta:
         model = UserModel

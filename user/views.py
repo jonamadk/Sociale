@@ -1,3 +1,4 @@
+from qrotp.views import TOTPVerifyView
 from django.shortcuts import render
 from django.db.models.query import QuerySet
 from rest_framework.views import APIView
@@ -14,7 +15,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
-from rest_framework.permissions import SAFE_METHODS, BasePermission, IsAdminUser, DjangoModelPermissions
+from rest_framework.permissions import IsAdminUser, DjangoModelPermissions
 from django.core.mail import send_mail
 from .otp_generator import *
 from decouple import config
@@ -23,24 +24,7 @@ from qrotp.models import MFHash
 import pyotp
 from django.contrib.auth.models import Group
 from django.core.mail import EmailMultiAlternatives
-
-
-# class PostUserWritePermission(BasePermission):
-
-
-#     message = 'Retrieving is restricted to the individual user only'
-
-#     def has_object_permission(self, request , view , obj):
-
-#         '''
-
-#         Permission Class for data retrieve and edit the associated data to self user
-
-#         '''
-
-#         if obj.username == request.user.username:
-#             return True
-#         return False
+from group.permissions import has_permission
 
 
 class UserSignupView(APIView):
@@ -48,6 +32,7 @@ class UserSignupView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    @has_permission('user.add_usermodel')
     def post(self, request, *args, **kwargs):
         ''' 
         POST Method for the new user registeration
@@ -103,7 +88,8 @@ class UserListView(generics.ListAPIView):
     ''' 
         GET Method for viewing the user's  list.
     '''
-
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminUser, DjangoModelPermissions]
     queryset = UserModel.objects.all()
     serializer_class = UserSignupSerializer
 
@@ -118,19 +104,11 @@ class UserUpdateView(generics.UpdateAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-
     queryset = UserModel.objects.all()
     serializer_class = UserUpdateSerializer
 
-
-
     def get_object(self):
         return UserModel.objects.get(username=self.request.user.username)
-
-  
-
-
-    
 
 
 class UserProfilePasswordUpdateView(APIView):
@@ -162,19 +140,21 @@ class UserProfilePasswordUpdateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserDeleteView(generics.DestroyAPIView):
+class UserDeleteView(APIView):
 
     ''' 
         DELETE Method for destroying the user.
     '''
+
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAdminUser]
-    
+    permission_classes = [IsAuthenticated, IsAdminUser, DjangoModelPermissions]
 
-    queryset = UserModel.objects.all()
-    serializer_class = UserUpdateSerializer
+    def delete(self, request, *args, **kwargs):
 
+        user = UserModel.objects.get(id=request.data.get("id"))
+        user.delete()
 
+        return Response({"success": True}, status=status.HTTP_200_OK)
 
 
 class UserRetrieveView(generics.RetrieveAPIView):
@@ -531,24 +511,23 @@ class CheckUserState(APIView):
     and the username
 
     '''
-    
+
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-    
+
     def post(self, request, *args, **kwargs):
 
         token_is = request.data.get("token")
         username_is = request.data.get("username")
 
         try:
-            token = Token.objects.get(key = token_is)
+            token = Token.objects.get(key=token_is)
             key = token.key
             user = token.user
         except:
-            return Response({"success":False}, status=status.HTTP_400_BAD_REQUEST)
-        
-  
+            return Response({"success": False}, status=status.HTTP_400_BAD_REQUEST)
+
         if token_is == str(key) and username_is == str(user):
             return Response({"success": True}, status=status.HTTP_200_OK)
         else:
-            return Response({"suceess": False }, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"suceess": False}, status=status.HTTP_400_BAD_REQUEST)

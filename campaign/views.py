@@ -1,7 +1,6 @@
 import campaign
 from django.contrib.auth import authenticate
 from django.db.models.lookups import IStartsWith
-
 from django.shortcuts import render
 import requests
 from rest_framework import generics
@@ -166,7 +165,6 @@ class HideCampaignView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    
     def post(self, request, *args, **kwargs):
 
         campaign = Campaign.objects.get(id=request.data.get('campaign_id'))
@@ -180,7 +178,6 @@ class UnHideCampaignView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-   
     def post(self, request, *args, **kwargs):
 
         campaign = Campaign.objects.get(id=request.data.get('campaign_id'))
@@ -234,7 +231,7 @@ class GetTargetUserGroupListView(generics.ListAPIView):
     '''
 
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
 
     queryset = TargetUserGroup.objects.all()
     serializer_class = GetTargetUserGroupSerializer
@@ -245,10 +242,32 @@ class GetTargetUserGroupListView(generics.ListAPIView):
         return TargetUserGroup.objects.get(user=user)
 
 
+class GetTargetUserGroupFromOrganizationView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @has_permission('campaigm.view_targetusergroup')
+    def post(self, request, *args, **kwargs):
+
+        targetusergroup = TargetUserGroup.objects.filter(
+            organization=request.data.get('organization'))
+        serializer = GetTargetUserGroupSerializer(targetusergroup, many=True)
+        return Response({"status": True, "payload": serializer.data})
+
+
+class GetTargetUserGroupAllView(generics.ListAPIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
+
+    queryset = TargetUserGroup.objects.all()
+    serializer_class = GetTargetUserGroupSerializer
+
+
 class UpdateTargetUserGroupView(generics.UpdateAPIView):
 
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
 
     queryset = TargetUserGroup.objects.all()
     serializer_class = GetTargetUserGroupSerializer
@@ -269,6 +288,7 @@ class DeleteTargetUserGroupView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    @has_permission('campaign.delete_targetusergroup')
     def delete(self, request, *args, **kwargs):
 
         group = TargetUserGroup.objects.get(id=request.data.get('group_id'))
@@ -330,6 +350,7 @@ class GetTargetUserListView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    @has_permission('campaign.add_targetuser')
     def post(self, request, *args, **kwargs):
 
         targetusergroup = TargetUserGroup.objects.get(
@@ -340,23 +361,12 @@ class GetTargetUserListView(APIView):
         return Response({"status": True, "payload": serializer.data})
 
 
-class GetTargetUserGroupFromOrganizationView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request, *args, **kwargs):
-
-        targetusergroup = TargetUserGroup.objects.filter(
-            organization=request.data.get('organization'))
-        serializer = GetTargetUserGroupSerializer(targetusergroup, many=True)
-        return Response({"status": True, "payload": serializer.data})
-
-
 class UpdateTargetUserListView(APIView):
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    @has_permission('campaign.change_targetuser')
     def put(self, request, *args, **kwargs):
 
         targetusergroup_is = TargetUserGroup.objects.get(
@@ -386,6 +396,7 @@ class AddTemplateReceiverList(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    @has_permission('campaign.change_campaign')
     def post(self, request, *args, **kwargs):
 
         emails = request.data.get("emails")
@@ -402,6 +413,7 @@ class CSVUploadView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
 
+    @has_permission('campaign.add_targetuser')
     def post(self, request, *args, **kwargs):
         '''
         POST Method for uploading the CSV
@@ -501,6 +513,9 @@ class SendTemplateMailView(APIView):
                 str(targetuser.target_user_uuid)+"/"+str(campaign.id) + \
                 "/"+str(campaign.templateresource)+"/"
             context_data["template_url"] = template_url
+            template_is.headerNav1 = context_data["image_url"]
+            print(context_data["template_url"])
+            template_is.save()
             context_data['url_is'] = url_is
             print(context_data["template_url"])
             context_data['text_content'] = text_content
@@ -515,7 +530,7 @@ class SendTemplateMailView(APIView):
         return Response({"success": True})
 
 
-@ api_view(['GET'])
+@api_view(['GET'])
 def template_load(request, targetuser_uuid, temp_resource):
 
     if request.method == 'GET':
@@ -532,7 +547,7 @@ def template_load(request, targetuser_uuid, temp_resource):
         return Response({"targetuser_uuid": targetuser_uuid, "Data": serializer.data, "leak_data": leak_data})
 
 
-@ api_view(['GET'])
+@api_view(['GET'])
 def image_load(request, targetuser_uuid, camp_id):
 
     if request.method == 'GET':
@@ -553,18 +568,6 @@ def image_load(request, targetuser_uuid, camp_id):
         red.save(response, "PNG")
         print("hit")
         return response
-
-
-class CheckPawnPassword(APIView):
-
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def get(self, requests, *args, **kwargs):
-
-        check_pawn()
-
-        return Response({"status": True})
 
 
 class TargetUserCredentials(APIView):

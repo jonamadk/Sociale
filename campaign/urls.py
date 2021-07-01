@@ -15,7 +15,6 @@ campaign = [
     path("schedule/", ScheduleCamapaignView.as_view()),
     path('send/image_load/<str:targetuser_uuid>/<int:camp_id>/',
          image_load, name='image_load'),
-    path('check/', CheckPawnPassword.as_view()),
     path('ua_data/', GetUserAgentData.as_view()),
     path('check/targetuser_leak/', TargetUserCredentials.as_view()),
     path('validate/template/', ValidateTemplate.as_view()),
@@ -33,7 +32,8 @@ group = [
     path('get/', GetTargetUserGroupListView.as_view()),
     path('update/', UpdateTargetUserGroupView.as_view()),
     path('delete/', DeleteTargetUserGroupView.as_view()),
-    path('list/', GetTargetUserGroupFromOrganizationView.as_view())
+    path('list/', GetTargetUserGroupFromOrganizationView.as_view()),
+    path('all/', GetTargetUserGroupAllView.as_view())
 
 ]
 

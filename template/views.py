@@ -13,6 +13,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 import pyotp
 from template.models import TemplateResource
+from group.permissions import has_permission
 
 
 class TemplateUpload(APIView):
@@ -92,6 +93,7 @@ class CreateResourceView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    @has_permission('template.add_templateresource')
     def post(self, request, *args, **kwargs):
         '''
         POST Method to create 
@@ -135,6 +137,7 @@ class UpdateTemplateResourceView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    @has_permission('template.change_templateresource')
     def put(self, request, *args, **kwargs):
         '''
 
@@ -180,6 +183,7 @@ class TemplateResourceListView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
 
+    @has_permission('template.view_templateresource')
     def get(self, request, *args, **kwargs):
         '''
         GET Method 
@@ -202,6 +206,7 @@ class TemplateResourceRetrieveView(APIView):
 
     parser_classes = [MultiPartParser, FormParser]
 
+    @has_permission("template.view_templateresource")
     def get(self, request, *args, **kwargs):
         '''
         GET Method to retrieve Template resource
