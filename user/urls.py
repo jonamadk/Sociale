@@ -4,7 +4,7 @@ from django.urls import path, include
 from .views import *
 
 user_crud_patterns = [
-    path("<int:pk>/update/profile/", UserUpdateView.as_view()),
+    path("update/profile/", UserUpdateView.as_view()),
     path("<int:pk>/delete/", UserDeleteView.as_view()),
     path("view/", UserRetrieveView.as_view()),
     path("update/password/", UserProfilePasswordUpdateView.as_view()),

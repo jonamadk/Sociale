@@ -87,3 +87,30 @@ class GetPermissionsList(generics.ListAPIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
     queryset = Permission.objects.all()
     serializer_class = PermissionSerializer
+
+
+
+
+class AdjustedPermissions(APIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+
+    def get (self, request , *args, **kwargs):
+
+        permission = Permission.objects.all()
+        serializer = PermissionSerializer(permission , many = True)
+
+        permission_data = serializer.data
+        permissions = permission_data
+        list_to_remove = ['_userobjectpermission','_logentry','_token','_groupobjectpermission','_session','_mfhash','_contenttype']
+        for permission in permissions[:]:
+
+            for item in list_to_remove:
+                if item in permission['codename']:
+                    permissions.remove(permission)
+        
+        granted_permission = permissions
+        
+        return Response({"permissions":granted_permission})

@@ -8,7 +8,8 @@ extra_patterns = [
     path('get/', GetUserGroupList.as_view()),
     path('permissions/', GetPermissionsList.as_view()),
     path('<int:pk>/update/', GroupUpdateView.as_view()),
-    path('<int:pk>/delete/', GroupDeleteView.as_view())
+    path('<int:pk>/delete/', GroupDeleteView.as_view()),
+    path('perm/', AdjustedPermissions.as_view())
 
 ]
 

@@ -118,8 +118,19 @@ class UserUpdateView(generics.UpdateAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+
     queryset = UserModel.objects.all()
     serializer_class = UserUpdateSerializer
+
+
+
+    def get_object(self):
+        return UserModel.objects.get(username=self.request.user.username)
+
+  
+
+
+    
 
 
 class UserProfilePasswordUpdateView(APIView):
@@ -156,10 +167,14 @@ class UserDeleteView(generics.DestroyAPIView):
     ''' 
         DELETE Method for destroying the user.
     '''
-
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAdminUser]
+    
+
     queryset = UserModel.objects.all()
     serializer_class = UserUpdateSerializer
+
+
 
 
 class UserRetrieveView(generics.RetrieveAPIView):
