@@ -130,6 +130,33 @@ class GetPermissionsList(generics.ListAPIView):
     serializer_class = PermissionSerializer
 
 
+class GetUserGroupandPermissions(APIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAdminUser, IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+
+        try:
+
+            user = UserModel.objects.get(id=request.user.id)
+            user_group = user.groups.all()
+            permission_list = []
+            group_name = []
+            for group in user_group:
+                group_is = Group.objects.get(id=group.id)
+                group_name.append(group_is.name)
+                permissions_are = group_is.permissions.all()
+            for permission in permissions_are:
+                permission_list.append(permission.codename)
+
+            return Response({"success": True, "group_associated": group_name, "permission_list": permission_list}, status=status.HTTP_200_OK)
+
+        except:
+
+            return Response({"success": False}, status=status.HTTP_501_NOT_IMPLEMENTED)
+
+
 class AdjustedPermissions(APIView):
 
     authentication_classes = [TokenAuthentication]

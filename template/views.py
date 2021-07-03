@@ -230,3 +230,4 @@ class TemplateResourceRetrieveView(APIView):
             return Response({'status': True, "data": serializers.data}, status=status.HTTP_200_OK)
         except:
             return Response({'status': False}, status=status.HTTP_404_NOT_FOUND)
+
