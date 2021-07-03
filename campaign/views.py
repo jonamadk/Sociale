@@ -325,33 +325,27 @@ class AddTargetUserEmailView(APIView):
     def post(self, request, *args, **kwargs):
 
         try:
-            print("here")
             emails = request.data.get('email')
             group_id = request.data.get('group_id')
             targetusergroup_is = TargetUserGroup.objects.get(
                 id=1)
 
-            print(targetusergroup_is)
-
-            for email in emails:
-                print(email)
-
-            # print("1")
             existing_target_user_list = TargetUser.objects.filter(
                 targetusergroup=targetusergroup_is.id)
 
-            print(existing_target_user_list)
-            # existing_target_user_email_list = []
-            # for target_user in existing_target_user_list:
-            #     existing_target_user_email_list.append(target_user.email)
-            # email_list = list(
-            # #     set(emails) - set(existing_target_user_email_list))
-            # for email in emails:
-            #     print("here")
-            #     targetuser = TargetUser.objects.create(
-            #         email=email, target_user_uuid=uuid.uuid4())
-            #     print(targetuser)
-            #     targetuser.targetusergroup.add(targetusergroup_is)
+            existing_target_user_email_list = []
+            for target_user in existing_target_user_list:
+                existing_target_user_email_list.append(target_user.email)
+
+            for email in emails:
+                if email in existing_target_user_email_list:
+                    pass
+
+                else:
+                    targetuser = TargetUser.objects.create(
+                        email=email, target_user_uuid=uuid.uuid4())
+
+                    targetuser.targetusergroup.add(targetusergroup_is)
 
             return Response({"status": True}, status=status.HTTP_201_CREATED)
         except:

@@ -139,7 +139,7 @@ class GetUserGroupandPermissions(APIView):
 
         try:
 
-            user = UserModel.objects.get(id=request.user.id)
+            user = UserModel.objects.get(id=request.data.get("user_id"))
             user_group = user.groups.all()
             permission_list = []
             group_name = []
