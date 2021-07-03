@@ -135,7 +135,7 @@ class GetUserGroupandPermissions(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAdminUser, IsAuthenticated]
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
 
         try:
 
