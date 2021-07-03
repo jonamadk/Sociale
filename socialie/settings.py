@@ -111,17 +111,6 @@ DATABASES = {
     }
 }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'Socialie',
-#         'HOST': 'localhost',
-#         'PORT': '3306',
-#         'USER': 'django',
-#         'PASSWORD': 'django-user-password',
-#     }
-# }
-
 
 # DATABASES = {
 #     'default': {

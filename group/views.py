@@ -142,14 +142,22 @@ class GetUserGroupandPermissions(APIView):
             user = UserModel.objects.get(id=request.data.get("user_id"))
             user_group = user.groups.all()
             permission_list = []
+            permission_are_list = []
             group_name = []
             for group in user_group:
                 group_is = Group.objects.get(id=group.id)
                 group_name.append(group_is.name)
                 permissions_are = group_is.permissions.all()
-            for permission in permissions_are:
-                permission_list.append(permission.codename)
+                permission_are_list.append(permissions_are)
 
+            for permission_are_item in permission_are_list:
+                for permission in permission_are_item:
+                    print(permission)
+
+                    permission_list.append(
+                        permission.codename)
+
+            permission_list = set(permission_list)
             return Response({"success": True, "group_associated": group_name, "permission_list": permission_list}, status=status.HTTP_200_OK)
 
         except:

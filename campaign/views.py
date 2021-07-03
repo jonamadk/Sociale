@@ -328,7 +328,7 @@ class AddTargetUserEmailView(APIView):
             emails = request.data.get('email')
             group_id = request.data.get('group_id')
             targetusergroup_is = TargetUserGroup.objects.get(
-                id=1)
+                id=group_id)
 
             existing_target_user_list = TargetUser.objects.filter(
                 targetusergroup=targetusergroup_is.id)
@@ -520,11 +520,7 @@ class SendTemplateMailView(APIView):
                 str(targetuser.target_user_uuid)+"/"+str(campaign.id) + \
                 "/"+str(campaign.templateresource)+"/"
             context_data["template_url"] = template_url
-            template_is.headerNav1 = context_data["image_url"]
-            print(context_data["template_url"])
-            template_is.save()
             context_data['url_is'] = url_is
-            print(context_data["template_url"])
             context_data['text_content'] = text_content
             context_data['subject_message'] = subject_message
             html_text = template.render(context_data)
