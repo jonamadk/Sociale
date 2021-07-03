@@ -202,6 +202,14 @@ class TemplateResourceListView(APIView):
             return Response({'status': False}, status=status.HTTP_404_NOT_FOUND)
 
 
+class AllTemplateResourceListView(generics.ListAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
+
+    queryset = TemplateResource.objects.all()
+    serializer_class = TemplateResourceSerializer
+
+
 class TemplateResourceRetrieveView(APIView):
 
     parser_classes = [MultiPartParser, FormParser]

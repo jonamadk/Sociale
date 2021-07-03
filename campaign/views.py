@@ -325,20 +325,33 @@ class AddTargetUserEmailView(APIView):
     def post(self, request, *args, **kwargs):
 
         try:
+            print("here")
             emails = request.data.get('email')
+            group_id = request.data.get('group_id')
             targetusergroup_is = TargetUserGroup.objects.get(
-                id=request.data.get('group_id'))
+                id=1)
+
+            print(targetusergroup_is)
+
+            for email in emails:
+                print(email)
+
+            # print("1")
             existing_target_user_list = TargetUser.objects.filter(
                 targetusergroup=targetusergroup_is.id)
-            existing_target_user_email_list = []
-            for target_user in existing_target_user_list:
-                existing_target_user_email_list.append(target_user.email)
-            email_list = list(
-                set(emails) - set(existing_target_user_email_list))
-            for email in email_list:
-                targetuser = TargetUser.objects.create(
-                    email=email, target_user_uuid=uuid.uuid4())
-                targetuser.targetusergroup.add(targetusergroup_is)
+
+            print(existing_target_user_list)
+            # existing_target_user_email_list = []
+            # for target_user in existing_target_user_list:
+            #     existing_target_user_email_list.append(target_user.email)
+            # email_list = list(
+            # #     set(emails) - set(existing_target_user_email_list))
+            # for email in emails:
+            #     print("here")
+            #     targetuser = TargetUser.objects.create(
+            #         email=email, target_user_uuid=uuid.uuid4())
+            #     print(targetuser)
+            #     targetuser.targetusergroup.add(targetusergroup_is)
 
             return Response({"status": True}, status=status.HTTP_201_CREATED)
         except:
@@ -498,7 +511,7 @@ class SendTemplateMailView(APIView):
         for email_id in targetuser_mail_list:
             template = get_template("mail_template.html")
             targetuser = TargetUser.objects.get(email=email_id)
-            subject, from_email, to = subject_message, "adkmanoz38@gmail.com",  [
+            subject, from_email, to = subject_message, "postmaster@drsushi404.xyz",  [
                 email_id]
             text_content = body_message
             context_data = dict()

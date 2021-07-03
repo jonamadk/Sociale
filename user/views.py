@@ -510,6 +510,8 @@ class CheckUserState(APIView):
     Checks the local storage token with the request token 
     and the username
 
+    Returns permissions of that user 
+
     '''
 
     authentication_classes = [TokenAuthentication]
@@ -528,6 +530,16 @@ class CheckUserState(APIView):
             return Response({"success": False}, status=status.HTTP_400_BAD_REQUEST)
 
         if token_is == str(key) and username_is == str(user):
-            return Response({"success": True}, status=status.HTTP_200_OK)
+            user_is = UserModel.objects.get(id=user.id)
+            user_group = user_is.groups.all()
+            permission_list = []
+            for group in user_group:
+                group_is = Group.objects.get(id=group.id)
+                permissions_are = group_is.permissions.all()
+            for permission in permissions_are:
+                permission_list.append(permission.codename)
+
+            return Response({"success": True, "permissions": permission_list}, status=status.HTTP_200_OK)
+
         else:
             return Response({"suceess": False}, status=status.HTTP_400_BAD_REQUEST)
