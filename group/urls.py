@@ -11,7 +11,7 @@ extra_patterns = [
     path('delete/', GroupDeleteView.as_view()),
     path('perm/', AdjustedPermissions.as_view()),
     path('testmail/', TestEmail.as_view()),
-    path('per/', GetUserGroupandPermissions.as_view())
+    path('details/', GetUserGroupandPermissions.as_view())
 
 ]
 
