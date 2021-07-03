@@ -4,8 +4,7 @@ from rest_framework.validators import UniqueValidator
 
 
 class UploadSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(validators=[UniqueValidator(
-        Template.objects.all())], max_length=None, required=True)
+    
 
     class Meta:
         model = Template
@@ -13,8 +12,7 @@ class UploadSerializer(serializers.ModelSerializer):
 
 
 class GetTemplateSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(validators=[UniqueValidator(
-        Template.objects.all())], max_length=None, required=True)
+    
 
     class Meta:
         model = Template
