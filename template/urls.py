@@ -16,7 +16,8 @@ resource_patterns = [
     path("update/", UpdateTemplateResourceView.as_view()),
     path("list/", TemplateResourceListView.as_view()),
     path("retrieve", TemplateResourceRetrieveView.as_view()),
-    path('get/', AllTemplateResourceListView.as_view())
+    path('get/', AllTemplateResourceListView.as_view()),
+    path('delete/', DeleteTemplateResourceView.as_view())
 ]
 
 urlpatterns = [
