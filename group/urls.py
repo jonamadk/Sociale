@@ -12,7 +12,7 @@ extra_patterns = [
     path('perm/', AdjustedPermissions.as_view()),
     path('testmail/', TestEmail.as_view()),
     path('details/', GetUserGroupandPermissions.as_view()),
-    path('viewpermissions/',GetPermissionsFromGroup.as_view())
+    path('viewpermissions/', GetPermissionsFromGroup.as_view())
 
 ]
 

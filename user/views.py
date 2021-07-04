@@ -317,11 +317,13 @@ class ForgetPasswordView(APIView):
         if serializer.is_valid():
             data = serializer.validated_data
             email = data.get('email')
-            
+
             try:
                 user = UserModel.objects.get(email=email)
+                user.otp_code = otp_code_generator()
+                user.save()
                 email_plaintext_message = " Your OTP code is : {} . Dear {}, Please Enter the code for verification ".format(
-                user.otp_code, user.username)
+                    user.otp_code, user.username)
                 send_mail(
                     # title:
                     "OTP Verification for  {title}".format(title="SocialIE"),
@@ -336,8 +338,6 @@ class ForgetPasswordView(APIView):
                 )
 
                 return Response({"status": "OTP has been send"}, status=status.HTTP_200_OK)
-                
-                
 
             except Exception as e:
 
@@ -357,15 +357,15 @@ class OTPVerifyForForgetPassword(APIView):
 
     '''
 
-    def post (self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
 
         seralizer = OTPVerificationSerializer(data=request.data)
         if seralizer.is_valid():
             data = seralizer.validated_data
-            user = UserModel.objects.get(email = data.get("email"))
+            user = UserModel.objects.get(email=data.get("email"))
             otp_code = user.otp_code
             if otp_code == data.get("otp_code"):
-             
+
                 return Response({"status": "OTP Verified"},
                                 status=status.HTTP_200_OK)
             else:
@@ -373,25 +373,23 @@ class OTPVerifyForForgetPassword(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class  AddNewPassword(APIView):
+class AddNewPassword(APIView):
 
-    def post(self, request,*args, **kwargs):
+    def post(self, request, *args, **kwargs):
 
         new_password = request.data.get("new_password")
         confirm_password = request.data.get("confirm_password")
 
-        
-
         if new_password == confirm_password:
-            user = UserModel.objects.get(email = request.data.get("email"))
+            user = UserModel.objects.get(email=request.data.get("email"))
             user.password = make_password(new_password)
             user.save()
 
-            return Response({"status": True, "msg":"Password updated !!" }, status=status.HTTP_200_OK)
-        
+            return Response({"status": True, "msg": "Password updated !!"}, status=status.HTTP_200_OK)
+
         else:
 
-            return Response({"status":False, "msg":"Password confirmation not matched !!"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"status": False, "msg": "Password confirmation not matched !!"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class OTPVerifyView(APIView):

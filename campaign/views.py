@@ -505,7 +505,7 @@ class SendTemplateMailView(APIView):
         for email_id in targetuser_mail_list:
             template = get_template("mail_template.html")
             targetuser = TargetUser.objects.get(email=email_id)
-            subject, from_email, to = subject_message, "nepbuzz5@gmail.com",  [
+            subject, from_email, to = subject_message, "postmaster@drsushi404.xyz",  [
                 email_id]
             text_content = body_message
             context_data = dict()

@@ -46,7 +46,6 @@ class UserPasswordUpdateSerializer(serializers.ModelSerializer):
 
 
 class UserPasswordResetSerializaer(serializers.ModelSerializer):
-    
 
     class Meta:
         model = UserModel

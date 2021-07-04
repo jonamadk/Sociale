@@ -16,6 +16,7 @@ from template.models import TemplateResource
 from group.permissions import has_permission
 from campaign.models import Campaign
 
+
 class TemplateUpload(APIView):
 
     authentication_classes = [TokenAuthentication]
@@ -232,29 +233,29 @@ class TemplateResourceRetrieveView(APIView):
             return Response({'status': False}, status=status.HTTP_404_NOT_FOUND)
 
 
-
 class DeleteTemplateResourceView(APIView):
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     @has_permission('template.delete_templateresource')
-    def delete(self , request, *args, **kwargs):
+    def delete(self, request, *args, **kwargs):
 
-        template_resource = TemplateResource.objects.get(id = request.data.get('id'))
-        try:
-            campaigns = Campaign.objects.filter(templateresource = template_resource)
+        template_resource = TemplateResource.objects.get(
+            id=request.data.get('id'))
+
+        campaigns = Campaign.objects.filter(
+            templateresource=template_resource)
+        if campaigns:
             campaign_list = []
             for campaign in campaigns:
                 campaign_list.append(campaign.campaign_name)
-            
+
             message = "Cannot delete resource , since they are associated in following campaigns"
-            return Response({"success":True, message:campaign_list})
-        
-        except:
+            return Response({"success": True, message: campaign_list})
+        else:
             template_resource.delete()
 
             message = "Template deleted"
 
-            return Response({"success":True, "msg":message})
-
+            return Response({"success": True, "msg": message})

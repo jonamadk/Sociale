@@ -4,7 +4,6 @@ from rest_framework.validators import UniqueValidator
 
 
 class UploadSerializer(serializers.ModelSerializer):
-    
 
     class Meta:
         model = Template
@@ -12,7 +11,6 @@ class UploadSerializer(serializers.ModelSerializer):
 
 
 class GetTemplateSerializer(serializers.ModelSerializer):
-    
 
     class Meta:
         model = Template
