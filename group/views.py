@@ -190,6 +190,39 @@ class AdjustedPermissions(APIView):
         return Response({"permissions": granted_permission})
 
 
+
+class GetPermissionsFromGroup(APIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAdminUser, IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+
+        try:
+
+            groups_is = Group.objects.get(id = request.data.get('group_id'))
+            print(groups_is)
+            permissions_in_group = groups_is.permissions.all()
+            permission_list = []
+
+            for permission in permissions_in_group:
+                print(permission)
+                permission_list.append(
+                    permission.codename)
+
+            permission_list = set(permission_list)
+            permission_list_is = list(permission_list)
+            data = {"group":groups_is.name, "permissons":permission_list_is}
+            return Response(data, status=status.HTTP_200_OK)
+
+        except:
+
+            return Response({"success": False}, status=status.HTTP_501_NOT_IMPLEMENTED)
+
+
+
+
+
 class TestEmail(APIView):
 
     authentication_classes = [TokenAuthentication]

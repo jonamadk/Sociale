@@ -317,19 +317,81 @@ class ForgetPasswordView(APIView):
         if serializer.is_valid():
             data = serializer.validated_data
             email = data.get('email')
-            new_password = data.get('new_password')
+            
             try:
                 user = UserModel.objects.get(email=email)
-                user.password = make_password(new_password)
-                user.save()
+                email_plaintext_message = " Your OTP code is : {} . Dear {}, Please Enter the code for verification ".format(
+                user.otp_code, user.username)
+                send_mail(
+                    # title:
+                    "OTP Verification for  {title}".format(title="SocialIE"),
+                    # message:
+                    email_plaintext_message,
+                    # from:
+                    config('EMAIL_HOST_USER'),
 
-                return Response({"status": "Password Updated"}, status=status.HTTP_200_OK)
+                    # to:
+                    [user.email]
+
+                )
+
+                return Response({"status": "OTP has been send"}, status=status.HTTP_200_OK)
+                
+                
 
             except Exception as e:
 
-                return Response({"message": "Email is not associated to account"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"message": "Sorry this email is not associated to account"}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class OTPVerifyForForgetPassword(APIView):
+
+    '''
+
+    OTP verification.
+
+    Thus Send OTP in user's mail is matched with the associated
+    user's db current OTP code for tasks like , login & forgot password.
+
+    '''
+
+    def post (self, request, *args, **kwargs):
+
+        seralizer = OTPVerificationSerializer(data=request.data)
+        if seralizer.is_valid():
+            data = seralizer.validated_data
+            user = UserModel.objects.get(email = data.get("email"))
+            otp_code = user.otp_code
+            if otp_code == data.get("otp_code"):
+             
+                return Response({"status": "OTP Verified"},
+                                status=status.HTTP_200_OK)
+            else:
+                return Response({"status": "Incorrect OTP"}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class  AddNewPassword(APIView):
+
+    def post(self, request,*args, **kwargs):
+
+        new_password = request.data.get("new_password")
+        confirm_password = request.data.get("confirm_password")
+
+        
+
+        if new_password == confirm_password:
+            user = UserModel.objects.get(email = request.data.get("email"))
+            user.password = make_password(new_password)
+            user.save()
+
+            return Response({"status": True, "msg":"Password updated !!" }, status=status.HTTP_200_OK)
+        
+        else:
+
+            return Response({"status":False, "msg":"Password confirmation not matched !!"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class OTPVerifyView(APIView):
@@ -342,7 +404,7 @@ class OTPVerifyView(APIView):
 
         OTP verification.
 
-        Thus Send OTP in user's mail and phonenumber is matched with the associated
+        Thus Send OTP in user's mail is matched with the associated
         user's db current OTP code for tasks like , login & forgot password.
 
         '''

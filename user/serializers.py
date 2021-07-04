@@ -46,12 +46,11 @@ class UserPasswordUpdateSerializer(serializers.ModelSerializer):
 
 
 class UserPasswordResetSerializaer(serializers.ModelSerializer):
-    new_password = serializers.CharField(
-        min_length=8, max_length=None, write_only=True)
+    
 
     class Meta:
         model = UserModel
-        fields = ["email", "new_password"]
+        fields = ["email"]
 
 
 class OTPSendMailSerializaer(serializers.ModelSerializer):

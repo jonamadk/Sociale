@@ -28,8 +28,8 @@ class TemplateResource(models.Model):
     user = models.ForeignKey(UserModel, on_delete=models.CASCADE)
     template_name = models.CharField(
         max_length=250, blank=True, null=True, unique=True)
-    template_url = models.CharField(max_length=250, blank=True, null=True)
-    # template = models.ForeignKey(Template, on_delete=models.CASCADE)
+    template_url = models.CharField(max_length=250, blank=True, null=True, unique =False)
+   
 
     def __str__(self):
         return self.template_name
