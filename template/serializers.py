@@ -3,18 +3,7 @@ from .models import *
 from rest_framework.validators import UniqueValidator
 
 
-class UploadSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = Template
-        fields = ['template_file', 'name']
-
-
-class GetTemplateSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Template
-        fields = ['template_file', 'name', 'id']
 
 
 class TemplateResourceSerializer(serializers.ModelSerializer):

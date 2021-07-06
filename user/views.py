@@ -77,7 +77,7 @@ class UserSignupView(APIView):
                                     status=status.HTTP_200_OK)
 
                 except Exception as e:
-                    return Response({"status": "Group is not added"}, status=status.HTTP_501_NOT_IMPLEMENTED)
+                    return Response({"status": "User created but permission group is not added"}, status=status.HTTP_501_NOT_IMPLEMENTED)
 
             return Response({"status": "Password didn't match"}, status=status.HTTP_403_FORBIDDEN)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

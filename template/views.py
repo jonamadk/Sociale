@@ -17,78 +17,6 @@ from group.permissions import has_permission
 from campaign.models import Campaign
 
 
-class TemplateUpload(APIView):
-
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
-
-    def post(self, request, *args, **kwargs):
-        '''
-        POST Method for uploading the template
-
-        '''
-
-        serializer = UploadSerializer(data=request.data)
-        if request.user.is_authenticated:
-            user = UserModel.objects.get(id=request.user.id)
-            if serializer.is_valid():
-                data = serializer.validated_data
-                template = Template.objects.create(name=data.get("name"),
-                                                   template_file=data.get(
-                                                       'template_file'),
-                                                   user=user, created_date=datetime.date.today())
-
-                return Response({"status": True, }, status=status.HTTP_201_CREATED)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        else:
-            return Response({"Messagae": "Not Authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
-
-
-class TemplateRetrieveView(generics.ListAPIView):
-
-    '''  
-        GET Method for viewing the templates.
-
-    '''
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
-    queryset = Template.objects.all()
-    serializer_class = GetTemplateSerializer
-
-    def get_object(self):
-        user = self.request.user
-        return Template.objects.filter(user=user)
-
-
-class TemplateDeleteView(generics.DestroyAPIView):
-
-    ''' 
-        DELETE Method for destroying the Template.
-    '''
-
-    parser_classes = [MultiPartParser, FormParser]
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    queryset = Template.objects.all()
-    serializer_class = UploadSerializer
-
-
-class TemplateUpdateView(generics.UpdateAPIView):
-
-    '''
-        PUT Method for template Update
-    '''
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
-    queryset = Template.objects.all()
-    serializer_class = UploadSerializer
-
-
 class CreateResourceView(APIView):
 
     authentication_classes = [TokenAuthentication]
@@ -252,10 +180,10 @@ class DeleteTemplateResourceView(APIView):
                 campaign_list.append(campaign.campaign_name)
 
             message = "Cannot delete resource , since they are associated in following campaigns"
-            return Response({"success": True, message: campaign_list})
+            return Response({"success": False, message: campaign_list},status=status.HTTP_404_NOT_FOUND)
         else:
             template_resource.delete()
 
             message = "Template deleted"
 
-            return Response({"success": True, "msg": message})
+            return Response({"success": True, "msg": message}, status=status.HTTP_200_OK)
