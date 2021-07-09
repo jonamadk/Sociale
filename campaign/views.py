@@ -505,7 +505,7 @@ class SendTemplateMailView(APIView):
         for email_id in targetuser_mail_list:
             template = get_template("mail_template.html")
             targetuser = TargetUser.objects.get(email=email_id)
-            subject, from_email, to = subject_message, "postmaster@drsushi404.xyz",  [
+            subject, from_email, to = subject_message, "postmaster@manojadhikary.com.np",  [
                 email_id]
             text_content = body_message
             context_data = dict()
@@ -616,9 +616,6 @@ class ScheduleCamapaignView(APIView):
 
 class ValidateTemplate(APIView):
 
-    authencation_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
     def post(self, request, *args, **kwargs):
 
         target_user_uuid = request.data.get('target_user_uuid')
@@ -679,13 +676,10 @@ class GetUserAgentData(APIView):
         targetuser_is.more_details = more_details
 
         targetuser_is.save()
-        # user_agent = parse(targetuser_is.user_agent_data)
-        ua = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
-        user_agent = parse(ua)
-        print(user_agent.browser.family)
-        print(user_agent.os.family)
-
-        print("os==>", user_agent.os.family)
+        user_agent = parse(targetuser_is.user_agent_data)
+        # ua = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
+        # user_agent = parse(ua)
+      
         if user_agent.os.family in platform['Mac']:
             print("Device ==> Mac")
             os_is = 'mac'
