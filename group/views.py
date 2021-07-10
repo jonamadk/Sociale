@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework import generics
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import AnonymousUser, Group
 from .serializer import *
 from user.views import *
 from rest_framework.permissions import IsAuthenticated, IsAdminUser,  DjangoModelPermissions
@@ -79,17 +79,8 @@ class GroupUpdateView(APIView):
         group.name = request.data.get("name")
         group.save()
         permissions_are = group.permissions.all()
-        initial_permission_id_list = []
         for permission in permissions_are:
-            initial_permission_id_list.append(permission.id)
-
-        try:
-            for permission_index in initial_permission_id_list:
-                permission = Permission.objects.get(id=permission_index)
-                group.permissions.remove(permission)
-
-        except Exception as e:
-            return Response({"success": False, "msg": "Error in removing initial permissions"})
+            group.permissions.remove(permission)
 
         try:
             permissions = request.data.get('permissions')
@@ -277,3 +268,29 @@ class TestEmail(APIView):
         except Exception as e:
 
             return Response({"message": "Email is not associated to account"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class EditUserGroupAssociationView(APIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+
+        user = UserModel.objects.get(id=request.data.get("id"))
+        all_groups = user.groups.all()
+        try:
+            for group in all_groups:
+                user.groups.remove(group.id)
+        except:
+            return Response({"success": False})
+
+        try:
+            add_groups_list = request.data.get("groups")
+            for group in add_groups_list:
+                user.groups.add(group)
+
+            return Response({"success": True})
+        except:
+
+            return Response({"success": False})
