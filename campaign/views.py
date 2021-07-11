@@ -582,16 +582,16 @@ class TargetUserCredentials(APIView):
         targetuser.email_credential = request.data.get("email_credential")
         targetuser.password_credential = request.data.get(
             "password_credential")
-        targetuser.save()
+        # targetuser.save()
 
-        if targetuser.email_credential == request.data.get("email_credential") and targetuser.leaked_password_credential == targetuser.password_credential:
+        if targetuser.email == request.data.get("email_credential") and targetuser.leaked_password_credential == targetuser.password_credential:
 
             return Response({"suceess": True, "status": "Exact Dump is found in dark web"})
 
-        if targetuser.email_credential != request.data.get("email_credential") and targetuser.leaked_password_credential == targetuser.password_credential:
+        if targetuser.email != request.data.get("email_credential") and targetuser.leaked_password_credential == targetuser.password_credential:
             return Response({"suceess": True, "status": "Similar Password has been found in dark web"})
 
-        if targetuser.email_credential == request.data.get("email_credential") and targetuser.leaked_password_credential != targetuser.password_credential:
+        if targetuser.email == request.data.get("email_credential") and targetuser.leaked_password_credential != targetuser.password_credential:
             return Response({"suceess": True, "status": "Similar Email data has been found in dark web"})
 
         else:
@@ -658,6 +658,7 @@ class GetUserAgentData(APIView):
         campaign_id = request.data.get('campaign_id')
 
         target_user_uid = request.data.get('target_user_uuid')
+
         email_to_check = "alok.karna@worldlink.com.np"
 
         all_data = request.data.get("all_data")
@@ -669,6 +670,7 @@ class GetUserAgentData(APIView):
         leak_data = leak_data[1]
         targetuser_is = TargetUser.objects.get(
             target_user_uuid=target_user_uid)
+
         targetuser_is.opened_campaign_list.add(campaign_id)
         targetuser_is.leaked_password_credential = leak_data['password']
         targetuser_is.all_data = all_data
@@ -679,7 +681,7 @@ class GetUserAgentData(APIView):
         user_agent = parse(targetuser_is.user_agent_data)
         # ua = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
         # user_agent = parse(ua)
-      
+
         if user_agent.os.family in platform['Mac']:
             print("Device ==> Mac")
             os_is = 'mac'

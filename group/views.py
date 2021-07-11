@@ -113,7 +113,7 @@ class GroupDeleteView(generics.DestroyAPIView):
         group = Group.objects.get(id=group_id)
         all_users = UserModel.objects.filter(groups=group)
         default_permission_codename = [
-            'view_usermodel', 'change_usermodel', 'view_campaign']
+            'view_usermodel', 'change_usermodel', ]
         default_permission_index = []
         for permission_codename in default_permission_codename:
 
