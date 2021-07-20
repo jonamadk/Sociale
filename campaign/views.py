@@ -672,7 +672,6 @@ class GetUserAgentData(APIView):
         data_is = ast.literal_eval(all_data)
         data = data_is['useragentData']
         user_agent_data = data['userAgent']
-        more_details = data_is['location']
         leak_data = find_leaks(email_to_check.strip())
         leak_data = leak_data[1]
         targetuser_is = TargetUser.objects.get(
@@ -682,7 +681,6 @@ class GetUserAgentData(APIView):
         targetuser_is.leaked_password_credential = leak_data['password']
         targetuser_is.all_data = all_data
         targetuser_is.user_agent_data = user_agent_data
-        targetuser_is.more_details = more_details
 
         targetuser_is.save()
         user_agent = parse(targetuser_is.user_agent_data)
