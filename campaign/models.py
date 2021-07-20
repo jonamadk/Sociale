@@ -39,7 +39,7 @@ class Campaign(models.Model):
 
 class TargetUser(models.Model):
 
-    email = models.EmailField(max_length=254, unique=True)
+    email = models.EmailField(max_length=254)
     targetusergroup = models.ManyToManyField(
         TargetUserGroup, related_name='targetuser',  blank=True)
     target_user_uuid = models.UUIDField(blank=True, null=True)

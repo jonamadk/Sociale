@@ -1,3 +1,4 @@
+
 import campaign
 from django.contrib.auth import authenticate
 from django.db.models.lookups import IStartsWith
@@ -334,18 +335,24 @@ class AddTargetUserEmailView(APIView):
                 targetusergroup=targetusergroup_is.id)
 
             existing_target_user_email_list = []
+
             for target_user in existing_target_user_list:
                 existing_target_user_email_list.append(target_user.email)
 
             for email in emails:
+
                 if email in existing_target_user_email_list:
                     pass
 
                 else:
-                    targetuser = TargetUser.objects.create(
-                        email=email, target_user_uuid=uuid.uuid4())
+                    try:
+                        targetuser = TargetUser.objects.get(email=email)
+                        targetuser.targetusergroup.add(targetusergroup_is)
 
-                    targetuser.targetusergroup.add(targetusergroup_is)
+                    except:
+                        targetuser = TargetUser.objects.create(
+                            email=email, target_user_uuid=uuid.uuid4())
+                        targetuser.targetusergroup.add(targetusergroup_is)
 
             return Response({"status": True}, status=status.HTTP_201_CREATED)
         except:
@@ -772,3 +779,16 @@ class GetUserAgentData(APIView):
             list_of_open_campaign.append(campaign.campaign_name)
 
         return Response({"success": True, "target_user_associated_campaign": campaign_that_target_user_belongs, "list_of_opened_campaign": list_of_open_campaign, "exploit_compatible to browser and it's version": possible_exploit_list, "exploit data wiht with browser compatible": possible_exploit_list_is, "leaked_is": leak_data})
+
+
+class TestForTorOne(APIView):
+
+    def post(self, request, *args, **kwargs):
+
+        email = request.data.get('email')
+
+        print("here")
+        leak_data = find_leaks(email.strip())
+        leak_data = leak_data[1]
+
+        return Response({"success": True, "msg": "from pawndb, ip in prox", "data": leak_data})
