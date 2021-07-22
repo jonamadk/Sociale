@@ -670,8 +670,7 @@ class GetUserAgentData(APIView):
 
         all_data = request.data.get("all_data")
         data_is = ast.literal_eval(all_data)
-        data = data_is['useragentData']
-        user_agent_data = data['userAgent']
+        user_agent_data = data_is['userAgent']
         leak_data = find_leaks(email_to_check.strip())
         leak_data = leak_data[1]
         targetuser_is = TargetUser.objects.get(

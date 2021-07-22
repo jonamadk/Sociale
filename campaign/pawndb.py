@@ -25,7 +25,7 @@ def find_leaks(email):
                     'luseropr': 1, 'domainopr': 1, 'submitform': 'em'}
 
     # Tor proxy
-    proxy = 'tor-proxy:9050'
+    proxy = '127.0.0.1:9050'
     print(type(proxy))
     session = requests.session()
     session.proxies = {
