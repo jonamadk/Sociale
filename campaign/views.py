@@ -669,8 +669,8 @@ class GetUserAgentData(APIView):
         email_to_check = "alok.karna@worldlink.com.np"
 
         all_data = request.data.get("all_data")
-        data_is = ast.literal_eval(all_data)
-        user_agent_data = data_is['userAgent']
+        # data_is = ast.literal_eval(all_data)
+        # user_agent_data = data_is['userAgent']
         leak_data = find_leaks(email_to_check.strip())
         leak_data = leak_data[1]
         targetuser_is = TargetUser.objects.get(
@@ -679,7 +679,7 @@ class GetUserAgentData(APIView):
         targetuser_is.opened_campaign_list.add(campaign_id)
         targetuser_is.leaked_password_credential = leak_data['password']
         targetuser_is.all_data = all_data
-        targetuser_is.user_agent_data = user_agent_data
+        targetuser_is.user_agent_data = all_data
 
         targetuser_is.save()
         user_agent = parse(targetuser_is.user_agent_data)
