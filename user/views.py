@@ -588,18 +588,27 @@ class CheckUserState(APIView):
             user = token.user
         except:
             return Response({"success": False}, status=status.HTTP_400_BAD_REQUEST)
-
+        token_verification = False
         if token_is == str(key) and username_is == str(user):
-            user_is = UserModel.objects.get(id=user.id)
-            user_group = user_is.groups.all()
-            permission_list = []
-            for group in user_group:
-                group_is = Group.objects.get(id=group.id)
-                permissions_are = group_is.permissions.all()
-            for permission in permissions_are:
-                permission_list.append(permission.codename)
 
-            return Response({"success": True, "permissions": permission_list}, status=status.HTTP_200_OK)
+            user_is = UserModel.objects.get(id=user.id)
+            try:
+                user_group = user_is.groups.all()
+                permission_list = []
+                for group in user_group:
+                    group_is = Group.objects.get(id=group.id)
+                    permissions_are = group_is.permissions.all()
+                for permission in permissions_are:
+                    permission_list.append(permission.codename)
+
+                return Response({"success": True, "permissions": permission_list}, status=status.HTTP_200_OK)
+            except:
+
+                user_permissions = user_is.user_permissions.all()
+                permission_list = []
+                for permission in user_permissions:
+                    permission_list.append(permission.codename)
+                return Response({"success": True, "permissions": permission_list}, status=status.HTTP_200_OK)
 
         else:
             return Response({"suceess": False}, status=status.HTTP_400_BAD_REQUEST)

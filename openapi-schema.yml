@@ -1,0 +1,82 @@
+info:
+  description: ''
+  title: ''
+  version: ''
+openapi: 3.0.0
+paths:
+  /check/:
+    post:
+      description: POST Method Sending OTP in Email
+      operationId: check_create
+      tags:
+      - check
+  /dump/:
+    post:
+      description: POST Method for uploading the CSV
+      operationId: dump_create
+      tags:
+      - dump
+  /email/:
+    post:
+      description: 'POST Method for adding new password
+
+
+        routed from forgot password'
+      operationId: email_create
+      tags:
+      - email
+  /mail/:
+    post:
+      description: POST Method Sending OTP in Email
+      operationId: mail_create
+      tags:
+      - mail
+  /pnumber/:
+    get:
+      operationId: pnumber_list
+      tags:
+      - pnumber
+  /setpassword/:
+    post:
+      operationId: setpassword_create
+      tags:
+      - setpassword
+  /signin/:
+    post:
+      description: 'POST Method for the user logging activity
+
+
+        Authenticate User with Email and password'
+      operationId: signin_create
+      tags:
+      - signin
+  /signup/:
+    post:
+      description: 'POST Method for the new user registeration
+
+
+        Checks if the incoming request data are validated and
+
+        creates the user.'
+      operationId: signup_create
+      tags:
+      - signup
+  /users/:
+    get:
+      description: GET Method for viewing the user's  list.
+      operationId: users_list
+      tags:
+      - users
+  /verify/:
+    post:
+      description: 'OTP verification.
+
+
+        Thus Send OTP in user''s mail is matched with the associated
+
+        user''s db current OTP code for tasks like , login & forgot password.'
+      operationId: verify_create
+      tags:
+      - verify
+servers:
+- url: ''

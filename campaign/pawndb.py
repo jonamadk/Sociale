@@ -1,6 +1,5 @@
 
-
-import sys 
+import sys
 
 import requests
 import argparse
@@ -8,7 +7,7 @@ from email.utils import getaddresses
 import json
 import json
 from requests import ConnectionError
-        
+
 
 def find_leaks(email):
     url = "http://pwndb2am4tzkvold.onion/"
@@ -21,15 +20,15 @@ def find_leaks(email):
         if not username:
             username = '%'
 
-    request_data = {'luser': username, 'domain': domain, 'luseropr': 1, 'domainopr': 1, 'submitform': 'em'}
-    
-  
+    request_data = {'luser': username, 'domain': domain,
+                    'luseropr': 1, 'domainopr': 1, 'submitform': 'em'}
 
     # Tor proxy
     proxy = '127.0.0.1:9050'
     print(type(proxy))
     session = requests.session()
-    session.proxies = {'http': 'socks5h://{}'.format(proxy), 'https': 'socks5h://{}'.format(proxy)}
+    session.proxies = {
+        'http': 'socks5h://{}'.format(proxy), 'https': 'socks5h://{}'.format(proxy)}
 
     r = session.post(url, data=request_data)
     return parse_pwndb_response(r.text)
@@ -37,7 +36,6 @@ def find_leaks(email):
 
 def parse_pwndb_response(text):
 
-    
     if "Array" not in text:
         return None
 
@@ -48,17 +46,16 @@ def parse_pwndb_response(text):
         leaked_email = ''
         domain = ''
         password = ''
-        try :
+        try:
             leaked_email = leak.split("[luser] =>")[1].split("[")[0].strip()
             domain = leak.split("[domain] =>")[1].split("[")[0].strip()
             password = leak.split("[password] =>")[1].split(")")[0].strip()
         except:
             pass
         if leaked_email:
-            emails.append({'username': leaked_email, 'domain': domain, 'password': password})
+            emails.append({'username': leaked_email,
+                          'domain': domain, 'password': password})
     return emails
-
-
 
 
 def check_pawn():
@@ -79,12 +76,5 @@ def check_pawn():
             print(results)
         with open('data.txt', 'w') as outfile:
             json.dump(results, outfile)
-    
 
         return "ok"
-
-
- 
-
-
-

@@ -1,3 +1,5 @@
+from rest_framework.utils.serializer_helpers import ReturnDict, ReturnList
+from ast import dump
 from group.permissions import has_permission
 from django.shortcuts import render
 from rest_framework.views import APIView
@@ -7,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework import generics
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import AnonymousUser, Group
 from .serializer import *
 from user.views import *
 from rest_framework.permissions import IsAuthenticated, IsAdminUser,  DjangoModelPermissions
@@ -15,6 +17,7 @@ from django.contrib.auth.models import Permission
 from django.core import serializers
 from .permissions import has_permission
 from django.shortcuts import render
+import json
 
 
 class UsersGroupCreateView(APIView):
@@ -56,8 +59,8 @@ class GetUserGroupList(generics.ListAPIView):
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, IsAdminUser, DjangoModelPermissions]
-    queryset = Group.objects.all()
     serializer_class = GroupSerializer
+    queryset = Group.objects.all()
 
 
 class GroupUpdateView(APIView):
@@ -69,24 +72,15 @@ class GroupUpdateView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, IsAdminUser]
 
-    @has_permission('group.change_group')
+    @ has_permission('group.change_group')
     def patch(self, request, *args, **kwargs):
 
         group = Group.objects.get(id=request.data.get('id'))
         group.name = request.data.get("name")
         group.save()
         permissions_are = group.permissions.all()
-        initial_permission_id_list = []
         for permission in permissions_are:
-            initial_permission_id_list.append(permission.id)
-
-        try:
-            for permission_index in initial_permission_id_list:
-                permission = Permission.objects.get(id=permission_index)
-                group.permissions.remove(permission)
-
-        except Exception as e:
-            return Response({"success": False, "msg": "Error in removing initial permissions"})
+            group.permissions.remove(permission)
 
         try:
             permissions = request.data.get('permissions')
@@ -112,12 +106,32 @@ class GroupDeleteView(generics.DestroyAPIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
     serializer_class = GroupSerializer
 
-    @has_permission('group.delete_group')
+    @ has_permission('group.delete_group')
     def delete(self, request, *args, **kwargs):
 
         group_id = self.request.data.get("id")
         group = Group.objects.get(id=group_id)
-        group.delete()
+        all_users = UserModel.objects.filter(groups=group)
+        default_permission_codename = [
+            'view_usermodel', 'change_usermodel', ]
+        default_permission_index = []
+        for permission_codename in default_permission_codename:
+
+            permission = Permission.objects.get(codename=permission_codename)
+            default_permission_index.append(permission.id)
+        if not all_users:
+            for user in all_users:
+                user_is = UserModel.objects.get(id=user.id)
+                for permission_index in default_permission_index:
+                    user_is.user_permissions.add(permission_index)
+            group.delete()
+            return Response({"success": True}, status=status.HTTP_200_OK)
+        else:
+            for user in all_users:
+                user_is = UserModel.objects.get(id=user.id)
+                for permission_index in default_permission_index:
+                    user_is.user_permissions.add(permission_index)
+            group.delete()
 
         return Response({"success": True}, status=status.HTTP_200_OK)
 
@@ -254,3 +268,29 @@ class TestEmail(APIView):
         except Exception as e:
 
             return Response({"message": "Email is not associated to account"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class EditUserGroupAssociationView(APIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+
+        user = UserModel.objects.get(id=request.data.get("id"))
+        all_groups = user.groups.all()
+        try:
+            for group in all_groups:
+                user.groups.remove(group.id)
+        except:
+            return Response({"success": False})
+
+        try:
+            add_groups_list = request.data.get("groups")
+            for group in add_groups_list:
+                user.groups.add(group)
+
+            return Response({"success": True})
+        except:
+
+            return Response({"success": False})

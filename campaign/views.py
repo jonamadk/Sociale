@@ -1,3 +1,4 @@
+
 import campaign
 from django.contrib.auth import authenticate
 from django.db.models.lookups import IStartsWith
@@ -334,18 +335,24 @@ class AddTargetUserEmailView(APIView):
                 targetusergroup=targetusergroup_is.id)
 
             existing_target_user_email_list = []
+
             for target_user in existing_target_user_list:
                 existing_target_user_email_list.append(target_user.email)
 
             for email in emails:
+
                 if email in existing_target_user_email_list:
                     pass
 
                 else:
-                    targetuser = TargetUser.objects.create(
-                        email=email, target_user_uuid=uuid.uuid4())
+                    try:
+                        targetuser = TargetUser.objects.get(email=email)
+                        targetuser.targetusergroup.add(targetusergroup_is)
 
-                    targetuser.targetusergroup.add(targetusergroup_is)
+                    except:
+                        targetuser = TargetUser.objects.create(
+                            email=email, target_user_uuid=uuid.uuid4())
+                        targetuser.targetusergroup.add(targetusergroup_is)
 
             return Response({"status": True}, status=status.HTTP_201_CREATED)
         except:
@@ -505,7 +512,7 @@ class SendTemplateMailView(APIView):
         for email_id in targetuser_mail_list:
             template = get_template("mail_template.html")
             targetuser = TargetUser.objects.get(email=email_id)
-            subject, from_email, to = subject_message, "postmaster@drsushi404.xyz",  [
+            subject, from_email, to = subject_message, "postmaster@manojadhikary.com.np",  [
                 email_id]
             text_content = body_message
             context_data = dict()
@@ -582,16 +589,16 @@ class TargetUserCredentials(APIView):
         targetuser.email_credential = request.data.get("email_credential")
         targetuser.password_credential = request.data.get(
             "password_credential")
-        targetuser.save()
+        # targetuser.save()
 
-        if targetuser.email_credential == request.data.get("email_credential") and targetuser.leaked_password_credential == targetuser.password_credential:
+        if targetuser.email == request.data.get("email_credential") and targetuser.leaked_password_credential == targetuser.password_credential:
 
             return Response({"suceess": True, "status": "Exact Dump is found in dark web"})
 
-        if targetuser.email_credential != request.data.get("email_credential") and targetuser.leaked_password_credential == targetuser.password_credential:
+        if targetuser.email != request.data.get("email_credential") and targetuser.leaked_password_credential == targetuser.password_credential:
             return Response({"suceess": True, "status": "Similar Password has been found in dark web"})
 
-        if targetuser.email_credential == request.data.get("email_credential") and targetuser.leaked_password_credential != targetuser.password_credential:
+        if targetuser.email == request.data.get("email_credential") and targetuser.leaked_password_credential != targetuser.password_credential:
             return Response({"suceess": True, "status": "Similar Email data has been found in dark web"})
 
         else:
@@ -615,9 +622,6 @@ class ScheduleCamapaignView(APIView):
 
 
 class ValidateTemplate(APIView):
-
-    authencation_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
 
@@ -661,31 +665,27 @@ class GetUserAgentData(APIView):
         campaign_id = request.data.get('campaign_id')
 
         target_user_uid = request.data.get('target_user_uuid')
+
         email_to_check = "alok.karna@worldlink.com.np"
 
         all_data = request.data.get("all_data")
-        data_is = ast.literal_eval(all_data)
-        data = data_is['useragentData']
-        user_agent_data = data['userAgent']
-        more_details = data_is['location']
+        # data_is = ast.literal_eval(all_data)
+        # user_agent_data = data_is['userAgent']
         leak_data = find_leaks(email_to_check.strip())
         leak_data = leak_data[1]
         targetuser_is = TargetUser.objects.get(
             target_user_uuid=target_user_uid)
+
         targetuser_is.opened_campaign_list.add(campaign_id)
         targetuser_is.leaked_password_credential = leak_data['password']
         targetuser_is.all_data = all_data
-        targetuser_is.user_agent_data = user_agent_data
-        targetuser_is.more_details = more_details
+        targetuser_is.user_agent_data = all_data
 
         targetuser_is.save()
-        # user_agent = parse(targetuser_is.user_agent_data)
-        ua = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
-        user_agent = parse(ua)
-        print(user_agent.browser.family)
-        print(user_agent.os.family)
+        user_agent = parse(targetuser_is.user_agent_data)
+        # ua = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
+        # user_agent = parse(ua)
 
-        print("os==>", user_agent.os.family)
         if user_agent.os.family in platform['Mac']:
             print("Device ==> Mac")
             os_is = 'mac'
@@ -776,3 +776,16 @@ class GetUserAgentData(APIView):
             list_of_open_campaign.append(campaign.campaign_name)
 
         return Response({"success": True, "target_user_associated_campaign": campaign_that_target_user_belongs, "list_of_opened_campaign": list_of_open_campaign, "exploit_compatible to browser and it's version": possible_exploit_list, "exploit data wiht with browser compatible": possible_exploit_list_is, "leaked_is": leak_data})
+
+
+class TestForTorOne(APIView):
+
+    def post(self, request, *args, **kwargs):
+
+        email = request.data.get('email')
+
+        print("here")
+        leak_data = find_leaks(email.strip())
+        leak_data = leak_data[1]
+
+        return Response({"success": True, "msg": "from pawndb, ip in prox", "data": leak_data})

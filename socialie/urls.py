@@ -19,13 +19,25 @@ from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
 
+from django.views.generic import TemplateView
+
+from rest_framework.schemas import get_schema_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('qrotp.urls')),
-    path('',include('user.urls')),
+    path('', include('user.urls')),
     path('', include('group.urls')),
     path('', include('template.urls')),
     path('', include('campaign.urls')),
     path('', include('exploit_data.urls')),
-]+  static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('openapi', get_schema_view(
+         title="SocialE API's",
+         description="API Endpoints of SocialE",
+         version="1.0.0"
+         ), name='openapi-schema'),
+    path('', TemplateView.as_view(
+        template_name='swagger.html',
+        extra_context={'schema_url': 'openapi-schema'}
+    ), name='swagger-ui'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
