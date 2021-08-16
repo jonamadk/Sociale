@@ -1,4 +1,5 @@
 
+from group import serializer
 import campaign
 from django.contrib.auth import authenticate
 from django.db.models.lookups import IStartsWith
@@ -374,6 +375,15 @@ class GetTargetUserListView(APIView):
 
         return Response({"status": True, "payload": serializer.data})
 
+class GetAllTargetUsersList(APIView):
+    authentication_classes =[TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, *args, **kwargs):
+        targetuserslist = TargetUser.objects.all()
+        serializer = GetTargetUserSerializer(targetuserslist, many = True)
+        
+        return Response({"Status":True, "payload":serializer.data})
 
 class UpdateTargetUserListView(APIView):
 

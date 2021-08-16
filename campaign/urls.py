@@ -45,6 +45,7 @@ targetuser = [
     path('dump/', CSVUploadView.as_view()),
     path('get/', GetTargetUserListView.as_view()),
     path('update/', UpdateTargetUserListView.as_view()),
+    path('list/', GetAllTargetUsersList.as_view())
 ]
 
 urlpatterns = [
