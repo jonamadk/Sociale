@@ -1,5 +1,6 @@
 
 from django.db import models
+from django.db.models.fields import BLANK_CHOICE_DASH
 from template.models import TemplateResource
 from user.models import UserModel
 # Create your models here.
@@ -32,6 +33,9 @@ class Campaign(models.Model):
         default=0, blank=True, null=False)
     hide_camapaign_status = models.BooleanField(default=False)
     campaign_schedule_status = models.BooleanField(default=False)
+    start_time = models.CharField(max_length=150 , null=True, blank=True)
+    campaign_email_detail_message = models.CharField(max_length=254 , null=True, blank=True)
+    camapign_email_title_message = models.CharField(max_length=254, null=True, blank=True)
 
     def __str__(self):
         return self.campaign_name
