@@ -1,6 +1,7 @@
 
 from django.db import models
 from django.db.models.fields import BLANK_CHOICE_DASH
+from django.db.models.fields.reverse_related import OneToOneRel
 from template.models import TemplateResource
 from user.models import UserModel
 # Create your models here.
@@ -48,15 +49,20 @@ class TargetUser(models.Model):
         TargetUserGroup, related_name='targetuser',  blank=True)
     target_user_uuid = models.UUIDField(blank=True, null=True)
     status = models.BooleanField(default=False)
-    opened_campaign_list = models.ManyToManyField(Campaign, blank=True)
+    opened_campaign_list = models.ManyToManyField(Campaign, blank=True, related_name="opened_campaign")
+    associated_campaign_list = models.ManyToManyField(Campaign, blank=True, related_name="associated_campaign")
+    password_leaked_status = models.BooleanField(default=False )
     email_credential = models.EmailField(max_length=254, blank=True, null=True)
     password_credential = models.CharField(
         max_length=254, blank=True, null=True, )
     leaked_password_credential = models.CharField(
         max_length=254, blank=True, null=True, )
     user_agent_data = models.TextField(blank=True, null=True)
-    more_details = models.TextField(blank=True, null=True)
-    all_data = models.TextField(blank=True, null=True)
+    browser = models.CharField(
+        max_length=254, blank=True, null=True)
+    operating_sys =  models.CharField(
+        max_length=254, blank=True, null=True, )
+
 
     def __str__(self):
         return self.email
@@ -67,5 +73,16 @@ class TargetUserCSV(models.Model):
     uploaded = models.DateTimeField(auto_now_add=True)
     activated = models.BooleanField(default=False)
 
-    def _str__(self):
+    def __str__(self):
         return self.file_name
+
+
+class CampaignStatus(models.Model):
+    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
+    targetuser = models.ForeignKey(TargetUser, on_delete=models.CASCADE)
+    campaign_date = models.CharField(
+        max_length=254, blank=True, null=True )
+    
+    
+    def __str__(self):
+        return self.campaign_date

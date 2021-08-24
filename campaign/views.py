@@ -1,4 +1,6 @@
 
+from django.core.exceptions import AppRegistryNotReady
+from django.db.models import manager
 from group import serializer
 import campaign
 from django.contrib.auth import authenticate
@@ -39,7 +41,7 @@ from exploit_data.models import ExploitData
 from .exploit_match import *
 from exploit_data.serializers import *
 from group.permissions import has_permission
-
+from datetime import date
 
 class CreateCampaignView(APIView):
 
@@ -375,6 +377,30 @@ class GetTargetUserListView(APIView):
 
         return Response({"status": True, "payload": serializer.data})
 
+
+
+
+class GetTargetUserCampaignBasedFilter(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    
+    def post(self , request, *args , **kwargs):
+        
+        try:
+            campaign = Campaign.objects.get(id = request.data.get('campaign_id'))
+            targetusergroup = campaign.targetusergroup.all()
+            for group in targetusergroup:
+                group_is = TargetUserGroup.objects.get(id=group.id)
+                tuser = TargetUser.objects.filter(targetusergroup = group_is)
+                serializer = GetTargetUserSerializer(tuser, many= True)
+            return Response({"status":True, "payload":serializer.data}, status=status.HTTP_201_CREATED)
+        
+        except:
+            return Response({"status":False, "msg":"Campaign doen't exist"},status=status.HTTP_400_BAD_REQUEST)
+        
+        
+
 class GetAllTargetUsersList(APIView):
     authentication_classes =[TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -473,6 +499,7 @@ class CSVUploadView(APIView):
             return Response({"status": True, }, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class SendTemplateMailView(APIView):
@@ -578,7 +605,14 @@ def image_load(request, targetuser_uuid, camp_id):
         targetuser = TargetUser.objects.get(target_user_uuid=targetuser_uuid)
         campaign = Campaign.objects.get(id=camp_id)
         targetuser.opened_campaign_list.add(campaign)
-
+        campaignstat = CampaignStatus.objects.filter(campaign = campaign , targetuser = targetuser)
+        if campaignstat.exists():
+            for campaignstatobject in campaignstat:
+                campaignstatobject.campaign_date = date.today()
+                campaignstatobject.save()
+        
+        else:
+            CampaignStatus.objects.create(campaign = campaign ,targetuser = targetuser, campaign_date = date.today())
         if targetuser.status == False:
             initial_value = campaign.campaign_opened_count
             campaign.campaign_opened_count = initial_value + 1
@@ -623,8 +657,6 @@ class ScheduleCamapaignView(APIView):
     def post(self, request, *args, **kwargs):
         campaign_id = request.data.get('campaign_id')
         campaign = Campaign.objects.get(id=campaign_id)
-        print(campaign)
-
         campaign.campaign_schedule_status = True
         campaign.save()
         get_camp = Campaign.objects.filter(campaign_schedule_status=True)
@@ -678,124 +710,84 @@ class GetUserAgentData(APIView):
 
         email_to_check = "alok.karna@worldlink.com.np"
 
-        all_data = request.data.get("all_data")
-        # data_is = ast.literal_eval(all_data)
-        # user_agent_data = data_is['userAgent']
-        leak_data = find_leaks(email_to_check.strip())
-        leak_data = leak_data[1]
+        user_agent_data = request.data.get("user_agent_data")
+        # leak_data = find_leaks(email_to_check.strip())
+        # leak_data = leak_data[1]
         targetuser_is = TargetUser.objects.get(
             target_user_uuid=target_user_uid)
 
         targetuser_is.opened_campaign_list.add(campaign_id)
-        targetuser_is.leaked_password_credential = leak_data['password']
-        targetuser_is.all_data = all_data
-        targetuser_is.user_agent_data = all_data
+        # targetuser_is.leaked_password_credential = leak_data['password']
+        
 
+        if targetuser_is.leaked_password_credential is None:
+            targetuser_is.password_leaked_status = False
+        else:
+            targetuser_is.password_leaked_status = True
+            
+        targetuser_is.user_agent_data = user_agent_data
+        user_agent = parse(user_agent_data)
+        targetuser_is.browser = user_agent.browser.family
+        targetuser_is.operating_sys= user_agent.os.family
         targetuser_is.save()
-        user_agent = parse(targetuser_is.user_agent_data)
-        # ua = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
-        # user_agent = parse(ua)
 
-        if user_agent.os.family in platform['Mac']:
-            print("Device ==> Mac")
-            os_is = 'mac'
-        elif user_agent.os.family in platform['Windows']:
-            print("Device ==> Windows")
-            os_is = 'windows'
-        elif user_agent.os.family in platform['Linux']:
-            print("Device ==>Linux")
-            os_is = "linux"
-        else:
-            os_is = "some other os"
-
-        if user_agent.browser.family in browser['Chrome']:
-
-            browser_is = 'Google Chrome'
-
-        elif user_agent.browser.family in browser['Firefox']:
-
-            browser_is = 'FireFox'
-        elif user_agent.browser.family in browser['Safari']:
-
-            browser_is = "Safari"
-        else:
-            browser_is = "some other browser"
-        try:
-            # Match os,browser and version
-            print("here==>", browser_is, os_is)
-            expl_data = ExploitData.objects.all().filter(
-                platform=os_is, browser__icontains=browser_is, browser_version__iexact="47.0")
-            print(expl_data)
-            possible_exploit_list = []
-            for data in expl_data:
-                print(data.id, " browser is ==>", data.browser)
-                print(data.id, " version is===>", data.browser_version)
-                exploit_details = data.description
-                import re
-                description = re.split("-", exploit_details)
-                possible_exploit_is = description[0]
-                possible_exploit_list.append(possible_exploit_is)
-
-        except:
-            print("no exploit data with such os , browser and version")
-
-        try:
-            # Match with os and browser
-            print("here==>", browser_is, os_is)
-            expl_data = ExploitData.objects.all().filter(
-                platform=os_is, browser__icontains=browser_is)
-            print(expl_data)
-            possible_exploit_list_is = []
-            for data in expl_data:
-                print(data.id, " browser is ==>", data.browser)
-                print(data.id, " version is===>", data.browser_version)
-                exploit_details = data.description
-                import re
-                description = re.split("-", exploit_details)
-                possible_exploit_is = description[0]
-                print(possible_exploit_is)
-
-                possible_exploit_list_is.append(possible_exploit_is)
-
-        except:
-            print("no such exploit with os and browser search")
-
+        
         campaign = Campaign.objects.get(id=campaign_id)
+        targetuser_is.opened_campaign_list.add(campaign)
         if targetuser_is.status == False:
             initial_value = campaign.campaign_opened_count
             campaign.campaign_opened_count = initial_value + 1
             campaign.save()
             targetuser_is.status = True
             targetuser_is.save()
-        target_group = targetuser_is.targetusergroup.all()
-        campaign_name_list = []
-        for group in target_group:
+        campaignstat = CampaignStatus.objects.filter(campaign = campaign , targetuser = targetuser_is)
+        if campaignstat.exists():
+            for campaignstatobject in campaignstat:
+                campaignstatobject.campaign_date = date.today()
+                campaignstatobject.save()
+        else:
+            CampaignStatus.objects.create(campaign = campaign ,targetuser = targetuser_is, campaign_date = date.today())
+        try:
+            target_group = targetuser_is.targetusergroup.all()
+            campaign_name_list = []
+            for group in target_group:
 
-            campaign_list = Campaign.objects.filter(targetusergroup=group.id)
-            for campaign in campaign_list:
-                campaign = Campaign.objects.get(id=campaign.id)
-                campaign_name = campaign.campaign_name
-                campaign_name_list.append(campaign_name)
-                campaign_that_target_user_belongs = list(
-                    set(campaign_name_list))
+                campaign_list = Campaign.objects.filter(targetusergroup=group.id)
+                for campaign in campaign_list:
+                    targetuser_is.associated_campaign_list.add(campaign)
+                    campaign = Campaign.objects.get(id=campaign.id)
+                    campaign_name = campaign.campaign_name
+                    campaign_name_list.append(campaign_name)
+                    campaign_that_target_user_belongs = list(
+                        set(campaign_name_list))
+        
+            opened_campaign = targetuser_is.opened_campaign_list.all()
+            list_of_open_campaign = []
+            for campaign_item in opened_campaign:
+                campaign = Campaign.objects.get(id=campaign_item.id)
+                list_of_open_campaign.append(campaign.campaign_name)
 
-        opened_campaign = targetuser_is.opened_campaign_list.all()
-        list_of_open_campaign = []
-        for campaign_item in opened_campaign:
-            campaign = Campaign.objects.get(id=campaign_item.id)
-            list_of_open_campaign.append(campaign.campaign_name)
+            return Response({"success": True, "target_user_associated_campaign": campaign_that_target_user_belongs, "list_of_opened_campaign": list_of_open_campaign, "leaked_is":"leak_data"})
 
-        return Response({"success": True, "target_user_associated_campaign": campaign_that_target_user_belongs, "list_of_opened_campaign": list_of_open_campaign, "exploit_compatible to browser and it's version": possible_exploit_list, "exploit data wiht with browser compatible": possible_exploit_list_is, "leaked_is": leak_data})
-
-
+        except:
+            opened_campaign = targetuser_is.opened_campaign_list.all()
+            list_of_open_campaign = []
+            for campaign_item in opened_campaign:
+                campaign = Campaign.objects.get(id=campaign_item.id)
+                
+                list_of_open_campaign.append(campaign.campaign_name)
+            
+            return Response({"success": True, "target_user_associated_campaign": campaign.campaign_name, "list_of_opened_campaign": list_of_open_campaign,  "leaked_is":"leak_data"})
+            
 class TestForTorOne(APIView):
 
     def post(self, request, *args, **kwargs):
 
         email = request.data.get('email')
-
-        print("here")
         leak_data = find_leaks(email.strip())
         leak_data = leak_data[1]
 
         return Response({"success": True, "msg": "from pawndb, ip in prox", "data": leak_data})
+
+
+
