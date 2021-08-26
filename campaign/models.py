@@ -62,7 +62,7 @@ class TargetUser(models.Model):
         max_length=254, blank=True, null=True)
     operating_sys =  models.CharField(
         max_length=254, blank=True, null=True, )
-
+  
 
     def __str__(self):
         return self.email

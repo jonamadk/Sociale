@@ -1,4 +1,5 @@
 
+from typing import Counter
 from django.core.exceptions import AppRegistryNotReady
 from django.db.models import manager
 from group import serializer
@@ -42,6 +43,7 @@ from .exploit_match import *
 from exploit_data.serializers import *
 from group.permissions import has_permission
 from datetime import date
+from collections import Counter
 
 class CreateCampaignView(APIView):
 
@@ -391,9 +393,9 @@ class GetTargetUserCampaignBasedFilter(APIView):
             campaign = Campaign.objects.get(id = request.data.get('campaign_id'))
             targetusergroup = campaign.targetusergroup.all()
             for group in targetusergroup:
-                group_is = TargetUserGroup.objects.get(id=group.id)
-                tuser = TargetUser.objects.filter(targetusergroup = group_is)
-                serializer = GetTargetUserSerializer(tuser, many= True)
+                targetuser = TargetUser.objects.filter(targetusergroup = group)
+                serializer = GetTargetUserSerializer(targetuser, many= True)
+                
             return Response({"status":True, "payload":serializer.data}, status=status.HTTP_201_CREATED)
         
         except:
@@ -778,6 +780,52 @@ class GetUserAgentData(APIView):
                 list_of_open_campaign.append(campaign.campaign_name)
             
             return Response({"success": True, "target_user_associated_campaign": campaign.campaign_name, "list_of_opened_campaign": list_of_open_campaign,  "leaked_is":"leak_data"})
+    
+
+
+class GetBrowserandOSData(APIView):
+    
+    def post(self , request , *args, **kwargs):
+        
+        try:
+            os_list = []
+            browser_list =[]
+            campaign = Campaign.objects.get(id = request.data.get('campaign_id'))
+            target_mail_list = campaign.target_users_mail_list
+            target_mail_list = ast.literal_eval(target_mail_list)
+            targetuser_mail_list = []
+            for item in range(0, len(target_mail_list)):
+                item_dictionary = target_mail_list[item]
+                item_email = item_dictionary['email']
+                targetuser_mail_list.append(item_email)
+            for targetuseremail in targetuser_mail_list:
+                targetuser = TargetUser.objects.get(email = targetuseremail)
+                operatingsys_is = targetuser.operating_sys 
+                browser_is = targetuser.browser
+                os_list.append(operatingsys_is)
+                browser_list.append(browser_is)
+            os_detail = Counter(os_list)
+            browser_detail = Counter(browser_list)
+            return Response({"status":True, "Operating System Counts":os_detail,"Browser Counts":browser_detail}, status=status.HTTP_201_CREATED)
+
+        except:
+            return Response({"status":False, "msg":"Campaign doen't exist"},status=status.HTTP_400_BAD_REQUEST)
+            
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
             
 class TestForTorOne(APIView):
 
@@ -788,6 +836,8 @@ class TestForTorOne(APIView):
         leak_data = leak_data[1]
 
         return Response({"success": True, "msg": "from pawndb, ip in prox", "data": leak_data})
+
+
 
 
 

@@ -46,7 +46,8 @@ targetuser = [
     path('get/', GetTargetUserListView.as_view()),
     path('update/', UpdateTargetUserListView.as_view()),
     path('list/', GetAllTargetUsersList.as_view()),
-    path('data/', GetTargetUserCampaignBasedFilter.as_view())
+    path('data/', GetTargetUserCampaignBasedFilter.as_view()),
+    path('browser/', GetBrowserandOSData.as_view())
 ]
 
 urlpatterns = [
