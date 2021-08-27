@@ -80,8 +80,10 @@ class CreateCampaignView(APIView):
                 campaign.targetusergroup.add(selected_group)
             
             target_mail_list = campaign.target_users_mail_list
-            target_mail_list = ast.literal_eval(target_mail_list)
+            # target_mail_list = ast.literal_eval(target_mail_list)
 
+            
+            print(target_mail_list)
             targetuser_mail_list = []
             for item in range(0, len(target_mail_list)):
                 item_dictionary = target_mail_list[item]
@@ -558,34 +560,6 @@ class SendTemplateMailView(APIView):
             item_email = item_dictionary['email']
             targetuser_mail_list.append(item_email)
 
-        targetusergroup = campaign.targetusergroup.all()
-        for group in targetusergroup:
-
-            group_is = TargetUserGroup.objects.get(id=group.id)
-            targetuser = group_is.targetuser.all()
-            email_list = []
-            for user in targetuser:
-                email = user.email
-                email_list.append(email)
-        new_added_mail_list = [
-            x for x in targetuser_mail_list if x not in email_list]
-        all_target_user = TargetUser.objects.all()
-        all_email_list = []
-        for user in all_target_user:
-            email = user.email
-            all_email_list.append(email)
-        for email in new_added_mail_list:
-            if email in all_email_list:
-                pass
-            else:
-                targetuser = TargetUser.objects.get(
-                    email=email, associated_campaign_list__id =campaign.id)
-                if targetuser:
-                    pass
-                else:
-                    targetuser = TargetUser.objects.create(
-                        email=email, target_user_uuid=uuid.uuid4())
-                    targetuser.associated_campaign_list.add(campaign)
 
         for email_id in targetuser_mail_list:
             template = get_template("mail_template.html")
