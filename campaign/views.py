@@ -8,6 +8,7 @@ from django.contrib.auth import authenticate
 from django.db.models.lookups import IStartsWith
 from django.shortcuts import render
 import requests
+from group import permissions
 from rest_framework import generics
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
@@ -44,6 +45,8 @@ from exploit_data.serializers import *
 from group.permissions import has_permission
 from datetime import date
 from collections import Counter
+from django.db.models import Count
+from campaign import exploit_match
 
 class CreateCampaignView(APIView):
 
@@ -74,6 +77,20 @@ class CreateCampaignView(APIView):
             for group in targetusergroup:
                 selected_group = TargetUserGroup.objects.get(id=group)
                 campaign.targetusergroup.add(selected_group)
+            
+            target_mail_list = campaign.target_users_mail_list
+            target_mail_list = ast.literal_eval(target_mail_list)
+
+            targetuser_mail_list = []
+            for item in range(0, len(target_mail_list)):
+                item_dictionary = target_mail_list[item]
+                item_email = item_dictionary['email']
+                targetuser_mail_list.append(item_email)
+
+            for email in targetuser_mail_list:
+                targetuser = TargetUser.objects.create(
+                        email=email, target_user_uuid=uuid.uuid4())
+                targetuser.associated_campaign_list.add(campaign)
 
             return Response({"status": True}, status=status.HTTP_201_CREATED)
         else:
@@ -348,16 +365,10 @@ class AddTargetUserEmailView(APIView):
 
                 if email in existing_target_user_email_list:
                     pass
-
                 else:
-                    try:
-                        targetuser = TargetUser.objects.get(email=email)
-                        targetuser.targetusergroup.add(targetusergroup_is)
-
-                    except:
-                        targetuser = TargetUser.objects.create(
-                            email=email, target_user_uuid=uuid.uuid4())
-                        targetuser.targetusergroup.add(targetusergroup_is)
+                    targetuser = TargetUser.objects.create(
+                        email=email, target_user_uuid=uuid.uuid4())
+                    targetuser.targetusergroup.add(targetusergroup_is)
 
             return Response({"status": True}, status=status.HTTP_201_CREATED)
         except:
@@ -456,8 +467,10 @@ class AddTemplateReceiverList(APIView):
         campaign.target_users_mail_list = emails
         campaign.save()
 
-        return Response({"Status": "True"})
+        return Response({"Status": True})
 
+
+        
 
 class CSVUploadView(APIView):
 
@@ -543,10 +556,16 @@ class SendTemplateMailView(APIView):
             all_email_list.append(email)
         for email in new_added_mail_list:
             if email in all_email_list:
-                print("Already added")
+                pass
             else:
-                targetuser = TargetUser.objects.create(
-                    email=email, target_user_uuid=uuid.uuid4())
+                targetuser = TargetUser.objects.get(
+                    email=email, associated_campaign_list__id =campaign.id)
+                if targetuser:
+                    pass
+                else:
+                    targetuser = TargetUser.objects.create(
+                        email=email, target_user_uuid=uuid.uuid4())
+                    targetuser.associated_campaign_list.add(campaign)
 
         for email_id in targetuser_mail_list:
             template = get_template("mail_template.html")
@@ -635,7 +654,7 @@ class TargetUserCredentials(APIView):
         targetuser.email_credential = request.data.get("email_credential")
         targetuser.password_credential = request.data.get(
             "password_credential")
-        # targetuser.save()
+        targetuser.save()
 
         if targetuser.email == request.data.get("email_credential") and targetuser.leaked_password_credential == targetuser.password_credential:
 
@@ -733,7 +752,6 @@ class GetUserAgentData(APIView):
         targetuser_is.operating_sys= user_agent.os.family
         targetuser_is.save()
 
-        
         campaign = Campaign.objects.get(id=campaign_id)
         targetuser_is.opened_campaign_list.add(campaign)
         if targetuser_is.status == False:
@@ -785,42 +803,51 @@ class GetUserAgentData(APIView):
 
 class GetBrowserandOSData(APIView):
     
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    
     def post(self , request , *args, **kwargs):
+        '''
         
-        try:
-            os_list = []
-            browser_list =[]
-            campaign = Campaign.objects.get(id = request.data.get('campaign_id'))
-            target_mail_list = campaign.target_users_mail_list
-            target_mail_list = ast.literal_eval(target_mail_list)
-            targetuser_mail_list = []
-            for item in range(0, len(target_mail_list)):
-                item_dictionary = target_mail_list[item]
-                item_email = item_dictionary['email']
-                targetuser_mail_list.append(item_email)
-            for targetuseremail in targetuser_mail_list:
-                targetuser = TargetUser.objects.get(email = targetuseremail)
-                operatingsys_is = targetuser.operating_sys 
-                browser_is = targetuser.browser
-                os_list.append(operatingsys_is)
-                browser_list.append(browser_is)
-            os_detail = Counter(os_list)
-            browser_detail = Counter(browser_list)
-            return Response({"status":True, "Operating System Counts":os_detail,"Browser Counts":browser_detail}, status=status.HTTP_201_CREATED)
+        Post Method for retrieving browser and Operating 
+        System Data 
+        
+        '''
+        campaign_id = request.data.get('campaign_id')
+        if campaign_id:
+            targetusers_browser = TargetUser.objects.filter(associated_campaign_list__id=campaign_id).values('browser').annotate(total_browser_count = Count('browser'))
+            targetusers_os = TargetUser.objects.filter(associated_campaign_list__id=campaign_id).values('operating_sys').annotate(total_os_count = Count('operating_sys'))
 
-        except:
-            return Response({"status":False, "msg":"Campaign doen't exist"},status=status.HTTP_400_BAD_REQUEST)
-            
+        else:
+            targetusers_browser = TargetUser.objects.values('browser').annotate(total_browser_count = Count('browser'))
+            targetusers_os = TargetUser.objects.values('operating_sys').annotate(total_os_count = Count('operating_sys'))
+        data_list = []
+        for targetuser in targetusers_browser:
+            data = {}
+            data['browser'] =targetuser.get('browser')
+            data['total_browser_count'] = targetuser.get('total_browser_count')
+            data_list.append(data)
+        for targetuser in targetusers_os:
+            data = {}
+            data['operating_sys'] = targetuser.get('operating_sys')
+            data['total_os_count']=targetuser.get('total_os_count')
+            data_list.append(data)
+        return Response({"status":True, 'data':data_list}, status=status.HTTP_201_CREATED)
+
+        
+        
+  
     
+
+
+
+
+
     
+
     
-    
-    
-    
-    
-    
-    
-    
+
     
     
     

@@ -47,7 +47,7 @@ class TargetUser(models.Model):
     email = models.EmailField(max_length=254)
     targetusergroup = models.ManyToManyField(
         TargetUserGroup, related_name='targetuser',  blank=True)
-    target_user_uuid = models.UUIDField(blank=True, null=True)
+    target_user_uuid = models.UUIDField()
     status = models.BooleanField(default=False)
     opened_campaign_list = models.ManyToManyField(Campaign, blank=True, related_name="opened_campaign")
     associated_campaign_list = models.ManyToManyField(Campaign, blank=True, related_name="associated_campaign")

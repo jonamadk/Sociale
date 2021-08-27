@@ -8,7 +8,8 @@ user_crud_patterns = [
     path("delete/", UserDeleteView.as_view()),
     path("view/", UserRetrieveView.as_view()),
     path("update/password/", UserProfilePasswordUpdateView.as_view()),
-    path("state/", CheckUserState.as_view())
+    path("state/", CheckUserState.as_view()),
+    path("admin/log/", AdminLogger.as_view())
 
 ]
 

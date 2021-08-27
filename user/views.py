@@ -612,3 +612,18 @@ class CheckUserState(APIView):
 
         else:
             return Response({"suceess": False}, status=status.HTTP_400_BAD_REQUEST)
+
+from django.contrib.admin.models import LogEntry
+
+class AdminLogger(APIView):
+    
+    def post(self, request, *args, **kwargs):
+  
+
+        logs = LogEntry.objects.all() # You can also filter
+        for l in logs:
+            print(l.objects)
+            print(l.action_flag)
+            print(l.content_type)
+            
+        return Response({"success":True})

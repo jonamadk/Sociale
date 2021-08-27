@@ -25,7 +25,6 @@ campaign = [
     path("tor-test-one/", TestForTorOne.as_view()),
 
 
-
 ]
 
 
@@ -47,7 +46,7 @@ targetuser = [
     path('update/', UpdateTargetUserListView.as_view()),
     path('list/', GetAllTargetUsersList.as_view()),
     path('data/', GetTargetUserCampaignBasedFilter.as_view()),
-    path('browser/', GetBrowserandOSData.as_view())
+    path('browser/', GetBrowserandOSData.as_view()),
 ]
 
 urlpatterns = [
