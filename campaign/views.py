@@ -1,4 +1,5 @@
 
+from os import name
 from typing import Counter
 from django.core.exceptions import AppRegistryNotReady
 from django.db.models import manager
@@ -86,6 +87,8 @@ class CreateCampaignView(APIView):
                 item_dictionary = target_mail_list[item]
                 item_email = item_dictionary['email']
                 targetuser_mail_list.append(item_email)
+            
+            
 
             targetusergroup = campaign.targetusergroup.all()
             for group in targetusergroup:
@@ -842,22 +845,40 @@ class GetBrowserandOSData(APIView):
         if campaign_id:
             targetusers_browser = TargetUser.objects.filter(associated_campaign_list__id=campaign_id).values('browser').annotate(total_browser_count = Count('browser'))
             targetusers_os = TargetUser.objects.filter(associated_campaign_list__id=campaign_id).values('operating_sys').annotate(total_os_count = Count('operating_sys'))
+            targetuser_leaked = TargetUser.objects.filter(associated_campaign_list__id=campaign_id, password_leaked_status = True)
 
         else:
             targetusers_browser = TargetUser.objects.values('browser').annotate(total_browser_count = Count('browser'))
             targetusers_os = TargetUser.objects.values('operating_sys').annotate(total_os_count = Count('operating_sys'))
-        data_list = []
+            targetuser_leaked = TargetUser.objects.filter(password_leaked_status = True)
+            
+        data_list_browser = []
+        detail ={}
+        
         for targetuser in targetusers_browser:
+            data_list_browser
             data = {}
-            data['browser'] =targetuser.get('browser')
-            data['total_browser_count'] = targetuser.get('total_browser_count')
-            data_list.append(data)
+            data['browser name'] =targetuser.get('browser')
+            data['total browser count'] = targetuser.get('total_browser_count')
+            data_list_browser.append(targetuser)
+            detail["browsers"]=data_list_browser
+            
+        data_list_os=[]
         for targetuser in targetusers_os:
             data = {}
-            data['operating_sys'] = targetuser.get('operating_sys')
-            data['total_os_count']=targetuser.get('total_os_count')
-            data_list.append(data)
-        return Response({"status":True, 'data':data_list}, status=status.HTTP_201_CREATED)
+            data['operating sys name'] = targetuser.get('operating_sys')
+            data['total os count']=targetuser.get('total_os_count')
+            data_list_os.append(data)
+            detail["operating system"]=data_list_os
+        
+        
+        targetuser_list = []
+        for targetuser in targetuser_leaked:
+            targetuser_list.append(targetuser.email)
+        victim_count = len(targetuser_list)
+        detail["toatal victim"] = victim_count
+        
+        return Response({"status":True, 'data':detail}, status=status.HTTP_201_CREATED)
 
         
         
