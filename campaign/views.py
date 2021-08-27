@@ -88,8 +88,6 @@ class CreateCampaignView(APIView):
                 item_email = item_dictionary['email']
                 targetuser_mail_list.append(item_email)
             
-            
-
             targetusergroup = campaign.targetusergroup.all()
             for group in targetusergroup:
 
@@ -110,14 +108,9 @@ class CreateCampaignView(APIView):
                 if email in all_email_list:
                     pass
                 else:
-                    targetuser = TargetUser.objects.get(
-                        email=email, associated_campaign_list__id =campaign.id)
-                    if targetuser:
-                        pass
-                    else:
-                        targetuser = TargetUser.objects.create(
+                    targetuser = TargetUser.objects.create(
                             email=email, target_user_uuid=uuid.uuid4())
-                        targetuser.associated_campaign_list.add(campaign)
+                    targetuser.associated_campaign_list.add(campaign)
 
             return Response({"status": True}, status=status.HTTP_201_CREATED)
         else:
