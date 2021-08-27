@@ -87,10 +87,34 @@ class CreateCampaignView(APIView):
                 item_email = item_dictionary['email']
                 targetuser_mail_list.append(item_email)
 
-            for email in targetuser_mail_list:
-                targetuser = TargetUser.objects.create(
-                        email=email, target_user_uuid=uuid.uuid4())
-                targetuser.associated_campaign_list.add(campaign)
+            targetusergroup = campaign.targetusergroup.all()
+            for group in targetusergroup:
+
+                group_is = TargetUserGroup.objects.get(id=group.id)
+                targetuser = group_is.targetuser.all()
+                email_list = []
+                for user in targetuser:
+                    email = user.email
+                    email_list.append(email)
+            new_added_mail_list = [
+                x for x in targetuser_mail_list if x not in email_list]
+            all_target_user = TargetUser.objects.all()
+            all_email_list = []
+            for user in all_target_user:
+                email = user.email
+                all_email_list.append(email)
+            for email in new_added_mail_list:
+                if email in all_email_list:
+                    pass
+                else:
+                    targetuser = TargetUser.objects.get(
+                        email=email, associated_campaign_list__id =campaign.id)
+                    if targetuser:
+                        pass
+                    else:
+                        targetuser = TargetUser.objects.create(
+                            email=email, target_user_uuid=uuid.uuid4())
+                        targetuser.associated_campaign_list.add(campaign)
 
             return Response({"status": True}, status=status.HTTP_201_CREATED)
         else:
