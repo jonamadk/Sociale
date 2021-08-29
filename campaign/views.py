@@ -48,6 +48,10 @@ from datetime import date
 from collections import Counter
 from django.db.models import Count
 from campaign import exploit_match
+from user.views import logger_is
+from .pagination import *
+
+
 
 class CreateCampaignView(APIView):
 
@@ -282,8 +286,11 @@ class GetTargetUserGroupListView(generics.ListAPIView):
     serializer_class = GetTargetUserGroupSerializer
 
     def get_object(self):
+        
 
         user = UserModel.objects.get(id=self.request.user.id)
+        print("=>>>>>>>>>>>>>>>>>>>>>>")
+        logger_is(user, "Get the targetuser group_list", "get the all targetuser list")
         return TargetUserGroup.objects.get(user=user)
 
 
@@ -370,6 +377,8 @@ class AddTargetUserEmailView(APIView):
     def post(self, request, *args, **kwargs):
 
         try:
+            user = request.user
+            
             emails = request.data.get('email')
             group_id = request.data.get('group_id')
             targetusergroup_is = TargetUserGroup.objects.get(
@@ -391,7 +400,9 @@ class AddTargetUserEmailView(APIView):
                     targetuser = TargetUser.objects.create(
                         email=email, target_user_uuid=uuid.uuid4())
                     targetuser.targetusergroup.add(targetusergroup_is)
-
+            
+            logger_is(request,"Get the targetuser group_list", "get the all targetuser list")
+            
             return Response({"status": True}, status=status.HTTP_201_CREATED)
         except:
             return Response({"status": False}, status=status.HTTP_400_BAD_REQUEST)
@@ -627,12 +638,13 @@ def image_load(request, targetuser_uuid, camp_id):
                 campaignstatobject.save()
         
         else:
-            CampaignStatus.objects.create(campaign = campaign ,targetuser = targetuser, campaign_date = date.today())
-        if targetuser.status == False:
+            CampaignStatus.objects.create(campaign = campaign ,targetuser = targetuser, campaign_opened_date = date.today())
+        if targetuser.campaign_opened_status == False:
             initial_value = campaign.campaign_opened_count
+            campaign.email_opened_status = True
             campaign.campaign_opened_count = initial_value + 1
             campaign.save()
-            targetuser.status = True
+            targetuser.campaign_opened_status = True
             targetuser.save()
         red.save(response, "PNG")
         print("hit")
@@ -748,11 +760,11 @@ class GetUserAgentData(APIView):
 
         campaign = Campaign.objects.get(id=campaign_id)
         targetuser_is.opened_campaign_list.add(campaign)
-        if targetuser_is.status == False:
+        if targetuser_is.campaign_opened_status == False:
             initial_value = campaign.campaign_opened_count
             campaign.campaign_opened_count = initial_value + 1
             campaign.save()
-            targetuser_is.status = True
+            targetuser_is.campaign_opened_status = True
             targetuser_is.save()
         campaignstat = CampaignStatus.objects.filter(campaign = campaign , targetuser = targetuser_is)
         if campaignstat.exists():
@@ -760,38 +772,8 @@ class GetUserAgentData(APIView):
                 campaignstatobject.campaign_date = date.today()
                 campaignstatobject.save()
         else:
-            CampaignStatus.objects.create(campaign = campaign ,targetuser = targetuser_is, campaign_date = date.today())
-        try:
-            target_group = targetuser_is.targetusergroup.all()
-            campaign_name_list = []
-            for group in target_group:
-
-                campaign_list = Campaign.objects.filter(targetusergroup=group.id)
-                for campaign in campaign_list:
-                    targetuser_is.associated_campaign_list.add(campaign)
-                    campaign = Campaign.objects.get(id=campaign.id)
-                    campaign_name = campaign.campaign_name
-                    campaign_name_list.append(campaign_name)
-                    campaign_that_target_user_belongs = list(
-                        set(campaign_name_list))
-        
-            opened_campaign = targetuser_is.opened_campaign_list.all()
-            list_of_open_campaign = []
-            for campaign_item in opened_campaign:
-                campaign = Campaign.objects.get(id=campaign_item.id)
-                list_of_open_campaign.append(campaign.campaign_name)
-
-            return Response({"success": True, "target_user_associated_campaign": campaign_that_target_user_belongs, "list_of_opened_campaign": list_of_open_campaign, "leaked_is":"leak_data"})
-
-        except:
-            opened_campaign = targetuser_is.opened_campaign_list.all()
-            list_of_open_campaign = []
-            for campaign_item in opened_campaign:
-                campaign = Campaign.objects.get(id=campaign_item.id)
-                
-                list_of_open_campaign.append(campaign.campaign_name)
-            
-            return Response({"success": True, "target_user_associated_campaign": campaign.campaign_name, "list_of_opened_campaign": list_of_open_campaign,  "leaked_is":"leak_data"})
+            CampaignStatus.objects.create(campaign = campaign ,targetuser = targetuser_is, campaign_opened_date = date.today())            
+            return Response({"success": True, "leaked_is":"leak_data"})
     
 
 
@@ -813,11 +795,16 @@ class GetBrowserandOSData(APIView):
             targetusers_browser = TargetUser.objects.filter(associated_campaign_list__id=campaign_id).values('browser').annotate(total_browser_count = Count('browser'))
             targetusers_os = TargetUser.objects.filter(associated_campaign_list__id=campaign_id).values('operating_sys').annotate(total_os_count = Count('operating_sys'))
             targetuser_leaked = TargetUser.objects.filter(associated_campaign_list__id=campaign_id, password_leaked_status = True)
+            targetusers = TargetUser.objects.filter(associated_campaign_list__id=campaign_id)
+            campaigns = Campaign.objects.filter(id = campaign_id).values('campaign_opened_count')
+    
 
         else:
             targetusers_browser = TargetUser.objects.values('browser').annotate(total_browser_count = Count('browser'))
             targetusers_os = TargetUser.objects.values('operating_sys').annotate(total_os_count = Count('operating_sys'))
             targetuser_leaked = TargetUser.objects.filter(password_leaked_status = True)
+            targetusers = TargetUser.objects.all()
+            campaigns = Campaign.objects.all().values('campaign_opened_count')
             
         data_list_browser = []
         detail ={}
@@ -839,32 +826,63 @@ class GetBrowserandOSData(APIView):
             detail["operating system"]=data_list_os
         
         
-        targetuser_list = []
+        leaked_targetuser_list = []
         for targetuser in targetuser_leaked:
-            targetuser_list.append(targetuser.email)
-        victim_count = len(targetuser_list)
+            leaked_targetuser_list.append(targetuser.email)
+        victim_count = len(leaked_targetuser_list)
         detail["toatal victim"] = victim_count
         
+        
+        targeruser_list=[]
+        for targetuser in targetusers:
+            targeruser_list.append(targetuser.email)
+            
+        target_user_count = len(targeruser_list)
+        detail["total targetuser"] = target_user_count
+        
+        value_is = []
+        for campaign in campaigns:
+            
+            value_is.append(campaign.get('campaign_opened_count'))
+        
+        sum_is = sum(value_is)
+        detail["total opened"] = sum_is
         return Response({"status":True, 'data':detail}, status=status.HTTP_201_CREATED)
 
+
+    
+class CountTargetUserDatewiseCountView(generics.ListAPIView):
+    
+    serializer_class = CountTargetUserDatewiseCountSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
+    queryset = Campaign.objects.all()
+    
+    def get_queryset(self):
+        campaign_id = self.request.GET.get('campaign',None)
+        if campaign_id:
+            return Campaign.objects.filter(id=campaign_id)
+        return Campaign.objects.all()
+            
+    
         
-        
-  
-    
-
-
-
-
-
-    
-
-    
-
-    
-    
+class LeakedTargetuserData(generics.ListAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated,DjangoModelPermissions]
+    queryset = TargetUser.objects.all()
+    serializer_class = GetTargetUserSerializer
+    pagination_class = CustomPagination
+    def get_queryset(self):
+        campaign_id = self.request.GET.get('campaign',None)
+        if campaign_id:
+            print(TargetUser.objects.filter(associated_campaign_list__id = campaign_id,password_leaked_status=True ).count())
+            return TargetUser.objects.filter(associated_campaign_list__id = campaign_id,password_leaked_status=True )
+        return TargetUser.objects.filter(password_leaked_status=True)
     
     
     
+    
+   
             
 class TestForTorOne(APIView):
 

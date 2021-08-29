@@ -1,3 +1,5 @@
+import campaign
+from group import serializer
 from django.db.models import fields
 from rest_framework import serializers
 from .models import *
@@ -68,3 +70,27 @@ class CSVUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = TargetUserCSV
         fields = ['file_name']
+
+from django.db.models import Count
+
+
+class CountTargetUserDatewiseCountSerializer(serializers.ModelSerializer):
+    target_user_count_by_date = serializers.SerializerMethodField(method_name = 'get_count')
+    class Meta:
+        model = Campaign
+        fields = ['campaign_name','target_user_count_by_date','campaign_opened_count']
+        
+    
+    def get_count(self, obj):
+        
+        data_is = []
+        details = CampaignStatus.objects.filter(campaign_id = obj.id).values('campaign_opened_date').annotate(total_count = Count('campaign_opened_date')) 
+        for campaignstatus in details:
+            data = {}
+            data["date"] = campaignstatus.get('campaign_opened_date')
+            data["count"] = campaignstatus.get('total_count')
+        
+            data_is.append(data)
+        
+        return details
+        

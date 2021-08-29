@@ -48,7 +48,8 @@ class TargetUser(models.Model):
     targetusergroup = models.ManyToManyField(
         TargetUserGroup, related_name='targetuser',  blank=True)
     target_user_uuid = models.UUIDField()
-    status = models.BooleanField(default=False)
+    campaign_opened_status = models.BooleanField(default=False)
+    email_opened_status = models.BooleanField(default=False)
     opened_campaign_list = models.ManyToManyField(Campaign, blank=True, related_name="opened_campaign")
     associated_campaign_list = models.ManyToManyField(Campaign, blank=True, related_name="associated_campaign")
     password_leaked_status = models.BooleanField(default=False )
@@ -62,6 +63,7 @@ class TargetUser(models.Model):
         max_length=254, blank=True, null=True)
     operating_sys =  models.CharField(
         max_length=254, blank=True, null=True, )
+    
   
 
     def __str__(self):
@@ -80,9 +82,19 @@ class TargetUserCSV(models.Model):
 class CampaignStatus(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     targetuser = models.ForeignKey(TargetUser, on_delete=models.CASCADE)
-    campaign_date = models.CharField(
-        max_length=254, blank=True, null=True )
+    campaign_opened_date = models.DateField(blank=True, null=True )
     
     
     def __str__(self):
-        return self.campaign_date
+        return str(self.campaign_opened_date)
+    
+    
+
+class UserLogger(models.Model):
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE)
+    dateandtime= models.DateTimeField(auto_now_add=True)
+    message = models.CharField(max_length=254, null=True, blank=True)
+    action=models.CharField(max_length=254, null=True, blank=True)
+    
+    def __str__(self):
+        return self.user.username

@@ -24,9 +24,18 @@ campaign = [
     path("delete/", DeleteCamapaignView.as_view()),
     path("tor-test-one/", TestForTorOne.as_view()),
 
-
 ]
 
+
+
+dashboard = [
+
+        path('data/', GetTargetUserCampaignBasedFilter.as_view()),
+        path('browser/', GetBrowserandOSData.as_view()),
+        path('get-campaign-report/', CountTargetUserDatewiseCountView.as_view(), name = 'get-campaign-report'),
+        path('targetuser_leaked/', LeakedTargetuserData.as_view())
+    
+             ]
 
 group = [
     path('create/', CreateTargetUserGroupView.as_view()),
@@ -45,12 +54,14 @@ targetuser = [
     path('get/', GetTargetUserListView.as_view()),
     path('update/', UpdateTargetUserListView.as_view()),
     path('list/', GetAllTargetUsersList.as_view()),
-    path('data/', GetTargetUserCampaignBasedFilter.as_view()),
-    path('browser/', GetBrowserandOSData.as_view()),
+   
 ]
 
 urlpatterns = [
     path('targetusergroup/', include(group)),
     path('targetuser/', include(targetuser)),
-    path('campaign/', include(campaign))
+    path('campaign/', include(campaign)),
+    path('dashboard/', include(dashboard))
+    
+    
 ]

@@ -29,3 +29,5 @@ admin.site.register(TargetUserCSV, TargetUserCsvAdmin)
 
 
 admin.site.register(CampaignStatus)
+
+admin.site.register(UserLogger)

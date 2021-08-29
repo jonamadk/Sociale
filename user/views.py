@@ -1,3 +1,4 @@
+from campaign import admin
 from qrotp.views import TOTPVerifyView
 from django.shortcuts import render
 from django.db.models.query import QuerySet
@@ -25,6 +26,10 @@ import pyotp
 from django.contrib.auth.models import Group
 from django.core.mail import EmailMultiAlternatives
 from group.permissions import has_permission
+from django.contrib.admin.models import LogEntry
+from campaign.models import *
+from datetime import datetime
+
 
 
 class UserSignupView(APIView):
@@ -613,17 +618,65 @@ class CheckUserState(APIView):
         else:
             return Response({"suceess": False}, status=status.HTTP_400_BAD_REQUEST)
 
-from django.contrib.admin.models import LogEntry
+
 
 class AdminLogger(APIView):
+    
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     
     def post(self, request, *args, **kwargs):
   
 
         logs = LogEntry.objects.all() # You can also filter
+        data = []
         for l in logs:
-            print(l.objects)
+            print(l)
+            print("user is ===>",l.user)
             print(l.action_flag)
+            print(l.action_time)
             print(l.content_type)
+            print(l.change_message)
+            # data_dict = {}
+            # data_dict["username"] = l.user
+            # data_dict["action"] = l.action_flag
+            # data_dict["content_type"] = l.content_type
+            # data_dict["time"] = l.action_time
+            # # data_dict["messaage"] =l.change_message
+            # data.append[data_dict]
             
-        return Response({"success":True})
+            
+            
+        return Response({"success":True , "data":data})
+    
+    
+
+# class LoggerAPI(APIView):
+#     authentication_classes = [TokenAuthentication]
+#     permission_classes = [IsAuthenticated]
+    
+#     def post(self, requests, *args, **kwargs):
+        
+#         userid = request.data.get("user_id")
+        
+#         user = UserModel.objects.get(id = userid)
+        
+#         return Response({"suvvess":True})
+        
+         
+    
+    
+def logger_is(request ,message,action_type):
+    
+    time_now = datetime.now()
+    userlog = UserLogger.objects.create(user = request.user, message=message, action =action_type)
+    return True
+    
+    
+    
+    
+    
+    
+    
+    
+    
