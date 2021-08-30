@@ -4,6 +4,7 @@ from .views import *
 from django.conf.urls.static import static
 from django.conf import settings
 
+
 campaign = [
     path('create/', CreateCampaignView.as_view()),
     path('update/', UpdateCampaignView.as_view()),
@@ -30,10 +31,12 @@ campaign = [
 
 dashboard = [
 
-        path('data/', GetTargetUserCampaignBasedFilter.as_view()),
+
         path('browser/', GetBrowserandOSData.as_view()),
         path('get-campaign-report/', CountTargetUserDatewiseCountView.as_view(), name = 'get-campaign-report'),
-        path('targetuser_leaked/', LeakedTargetuserData.as_view())
+        path('targetuser-leaked-status/', LeakedTargetuserData.as_view()),
+        path('targetuser-report/', TargetuserReport.as_view()),
+        
     
              ]
 
@@ -51,7 +54,7 @@ group = [
 targetuser = [
     path('create/', AddTargetUserEmailView.as_view()),
     path('dump/', CSVUploadView.as_view()),
-    path('get/', GetTargetUserListView.as_view()),
+    path('get/', GetTargetUserListView.as_view(), name = 'get-targetuser'),
     path('update/', UpdateTargetUserListView.as_view()),
     path('list/', GetAllTargetUsersList.as_view()),
    

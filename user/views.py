@@ -29,7 +29,7 @@ from group.permissions import has_permission
 from django.contrib.admin.models import LogEntry
 from campaign.models import *
 from datetime import datetime
-
+from rest_framework.reverse import reverse
 
 
 class UserSignupView(APIView):
@@ -83,7 +83,7 @@ class UserSignupView(APIView):
 
                 except Exception as e:
                     return Response({"status": "User created but permission group is not added"}, status=status.HTTP_501_NOT_IMPLEMENTED)
-
+            
             return Response({"status": "Password didn't match"}, status=status.HTTP_403_FORBIDDEN)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -620,35 +620,6 @@ class CheckUserState(APIView):
 
 
 
-class AdminLogger(APIView):
-    
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    
-    def post(self, request, *args, **kwargs):
-  
-
-        logs = LogEntry.objects.all() # You can also filter
-        data = []
-        for l in logs:
-            print(l)
-            print("user is ===>",l.user)
-            print(l.action_flag)
-            print(l.action_time)
-            print(l.content_type)
-            print(l.change_message)
-            # data_dict = {}
-            # data_dict["username"] = l.user
-            # data_dict["action"] = l.action_flag
-            # data_dict["content_type"] = l.content_type
-            # data_dict["time"] = l.action_time
-            # # data_dict["messaage"] =l.change_message
-            # data.append[data_dict]
-            
-            
-            
-        return Response({"success":True , "data":data})
-    
     
 
 # class LoggerAPI(APIView):
@@ -664,12 +635,15 @@ class AdminLogger(APIView):
 #         return Response({"suvvess":True})
         
          
-    
+
+
     
 def logger_is(request ,message,action_type):
-    
+    url_data = {
+            'url': reverse('get-targetuser', request=request)
+        }
     time_now = datetime.now()
-    userlog = UserLogger.objects.create(user = request.user, message=message, action =action_type)
+    userlog = UserLogger.objects.create(user = request.user, message=message, action =action_type, request_url = url_data['url'])
     return True
     
     

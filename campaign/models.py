@@ -95,6 +95,7 @@ class UserLogger(models.Model):
     dateandtime= models.DateTimeField(auto_now_add=True)
     message = models.CharField(max_length=254, null=True, blank=True)
     action=models.CharField(max_length=254, null=True, blank=True)
+    request_url = models.CharField(max_length=254, null= True, blank=True )
     
     def __str__(self):
         return self.user.username

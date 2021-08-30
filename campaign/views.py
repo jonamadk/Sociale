@@ -6,7 +6,7 @@ from django.db.models import manager
 from group import serializer
 import campaign
 from django.contrib.auth import authenticate
-from django.db.models.lookups import IStartsWith
+from django.db.models.lookups import GreaterThan, IStartsWith
 from django.shortcuts import render
 import requests
 from group import permissions
@@ -50,6 +50,7 @@ from django.db.models import Count
 from campaign import exploit_match
 from user.views import logger_is
 from .pagination import *
+from rest_framework.reverse import reverse
 
 
 
@@ -377,7 +378,7 @@ class AddTargetUserEmailView(APIView):
     def post(self, request, *args, **kwargs):
 
         try:
-            user = request.user
+        
             
             emails = request.data.get('email')
             group_id = request.data.get('group_id')
@@ -415,37 +416,16 @@ class GetTargetUserListView(APIView):
 
     @has_permission('campaign.add_targetuser')
     def post(self, request, *args, **kwargs):
-
+        user = request.user
         targetusergroup = TargetUserGroup.objects.get(
             id=request.data.get('group_id'))
         targetuser = TargetUser.objects.filter(targetusergroup=targetusergroup)
         serializer = GetTargetUserSerializer(targetuser, many=True)
+        logger_is(request, "some", "some")
 
         return Response({"status": True, "payload": serializer.data})
 
 
-
-
-class GetTargetUserCampaignBasedFilter(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    
-    
-    def post(self , request, *args , **kwargs):
-        
-        try:
-            campaign = Campaign.objects.get(id = request.data.get('campaign_id'))
-            targetusergroup = campaign.targetusergroup.all()
-            for group in targetusergroup:
-                targetuser = TargetUser.objects.filter(targetusergroup = group)
-                serializer = GetTargetUserSerializer(targetuser, many= True)
-                
-            return Response({"status":True, "payload":serializer.data}, status=status.HTTP_201_CREATED)
-        
-        except:
-            return Response({"status":False, "msg":"Campaign doen't exist"},status=status.HTTP_400_BAD_REQUEST)
-        
-        
 
 class GetAllTargetUsersList(APIView):
     authentication_classes =[TokenAuthentication]
@@ -830,7 +810,7 @@ class GetBrowserandOSData(APIView):
         for targetuser in targetuser_leaked:
             leaked_targetuser_list.append(targetuser.email)
         victim_count = len(leaked_targetuser_list)
-        detail["toatal victim"] = victim_count
+        detail["total victim"] = victim_count
         
         
         targeruser_list=[]
@@ -880,6 +860,22 @@ class LeakedTargetuserData(generics.ListAPIView):
         return TargetUser.objects.filter(password_leaked_status=True)
     
     
+
+class TargetuserReport(generics.ListAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
+    queryset = TargetUser.objects.all()
+    serializer_class = GetTargetUserSerializer
+    pagination_class = CustomPagination
+    def get_queryset(self):
+        '''
+        GET Method for targetuser filtered by Campaign 
+        and with no filter
+        '''
+        campaign_id = self.request.GET.get('campaign',None)
+        if campaign_id:
+            return TargetUser.objects.filter(associated_campaign_list__id = campaign_id)
+        return TargetUser.objects.all()
     
     
    
@@ -893,8 +889,6 @@ class TestForTorOne(APIView):
         leak_data = leak_data[1]
 
         return Response({"success": True, "msg": "from pawndb, ip in prox", "data": leak_data})
-
-
 
 
 
