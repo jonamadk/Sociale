@@ -265,6 +265,10 @@ class TwoFactorCheckandRoute(APIView):
             phonenumber = user.phonenumber
             otp_code = user.otp_code
             send_sms(otp_code, phonenumber)
+            try:
+                loggerone_is(user,request, user.username+user_related_messages["user-auth-status-sms"], "Check two factor auth type", "check-auth-type")
+            except:
+                return Response({"Msg":"Error in log creation"})
 
             return Response({"Status": " SMS Based", "user": user.username},
                             status=status.HTTP_200_OK)
@@ -289,9 +293,19 @@ class TwoFactorCheckandRoute(APIView):
                 [user.email]
 
             )
+            try:
+                loggerone_is(user,request, user.username+user_related_messages["user-auth-status-email"], "Check two factor auth type", "check-auth-type")
+            except:
+                return Response({"Msg":"Error in log creation"})
+
             return Response({"status": "Email Based"}, status=status.HTTP_200_OK)
 
         elif user.totp_two_factor_auth == True:
+            try:
+                loggerone_is(user,request, user.username+user_related_messages["user-auth-status-QR"], "Check two factor auth type", "check-auth-type")
+            except:
+                return Response({"Msg":"Error in log creation"})
+
 
             return Response({'message': 'Totp Implemented'}, status=status.HTTP_200_OK)
 

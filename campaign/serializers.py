@@ -95,7 +95,7 @@ class CountTargetUserDatewiseCountSerializer(serializers.ModelSerializer):
         return data_is
     
     def get_leaked(self, obj):
-        targetuser_leaked = TargetUser.objects.filter(password_leaked_status=True).values('password_leaked_status').annotate(total_Leakedtargetuser_count =Count('password_leaked_status'))
+        targetuser_leaked = TargetUser.objects.filter(associated_campaign_list__id=obj.id, password_leaked_status=True).values('password_leaked_status').annotate(total_Leakedtargetuser_count =Count('password_leaked_status'))
         leaked_data = []
         for targetuser in targetuser_leaked:
             data = targetuser.get('total_Leakedtargetuser_count')
