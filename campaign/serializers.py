@@ -77,7 +77,7 @@ class CountTargetUserDatewiseCountSerializer(serializers.ModelSerializer):
     leaked_user_count_is = serializers.SerializerMethodField(method_name = 'get_leaked')
     class Meta:
         model = Campaign
-        fields = ['campaign_name','target_user_count_by_date','campaign_opened_count','leaked_user_count_is']
+        fields = ['id','campaign_name','target_user_count_by_date','campaign_opened_count','leaked_user_count_is']
         
     
     def get_count(self, obj):
