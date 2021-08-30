@@ -15,7 +15,7 @@ user_crud_patterns = [
 
 urlpatterns = [
 
-    path("signup/", UserSignupView.as_view()),
+    path("signup/", UserSignupView.as_view(), name="user-signup"),
     path("signin/", UserSiginView.as_view()),
     path("signin/2f/", TwoFactorCheckandRoute.as_view()),
     path("users/", UserListView.as_view()),

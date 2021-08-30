@@ -48,9 +48,9 @@ from datetime import date
 from collections import Counter
 from django.db.models import Count
 from campaign import exploit_match
-from user.views import logger_is
+from user.logger import logger_is
 from .pagination import *
-from rest_framework.reverse import reverse
+from user.logmessage import *
 
 
 
@@ -837,6 +837,7 @@ class CountTargetUserDatewiseCountView(generics.ListAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, DjangoModelPermissions]
     queryset = Campaign.objects.all()
+    pagination_class = CamapaignDashboardpagination
     
     def get_queryset(self):
         campaign_id = self.request.GET.get('campaign',None)
@@ -851,7 +852,8 @@ class LeakedTargetuserData(generics.ListAPIView):
     permission_classes = [IsAuthenticated,DjangoModelPermissions]
     queryset = TargetUser.objects.all()
     serializer_class = GetTargetUserSerializer
-    pagination_class = CustomPagination
+    pagination_class = Targetuserleakedpagination
+    
     def get_queryset(self):
         campaign_id = self.request.GET.get('campaign',None)
         if campaign_id:
@@ -866,7 +868,7 @@ class TargetuserReport(generics.ListAPIView):
     permission_classes = [IsAuthenticated, DjangoModelPermissions]
     queryset = TargetUser.objects.all()
     serializer_class = GetTargetUserSerializer
-    pagination_class = CustomPagination
+    pagination_class = Targetuserleakedpagination
     def get_queryset(self):
         '''
         GET Method for targetuser filtered by Campaign 

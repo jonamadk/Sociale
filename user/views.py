@@ -29,8 +29,8 @@ from group.permissions import has_permission
 from django.contrib.admin.models import LogEntry
 from campaign.models import *
 from datetime import datetime
-from rest_framework.reverse import reverse
-
+from user.logmessage import *
+from user.logger import *
 
 class UserSignupView(APIView):
 
@@ -68,7 +68,7 @@ class UserSignupView(APIView):
                                                 )
                 token = Token.objects.create(user=user)
                 mfa_hash = MFHash.objects.create(user=user)
-
+               
                 try:
                     groups = request.data.get('groups')
 
@@ -77,7 +77,12 @@ class UserSignupView(APIView):
                         group_obj = Group.objects.get(id=items)
 
                         user.groups.add(group_obj)
-
+                    
+                    try:
+        
+                        logger_is(request, user.username+ user_related_messages["signup"], "added", "user-signup")
+                    except:
+                        return Response({"Msg":"Error in log creation"})
                     return Response({"key": get_object_or_404(Token, user=user).key, "user": user.username},
                                     status=status.HTTP_200_OK)
 
@@ -140,6 +145,7 @@ class UserProfilePasswordUpdateView(APIView):
                 return Response({"old_password": ["Old Password didn't match"]}, status=status.HTTP_403_FORBIDDEN)
             user.password = make_password(newpassword)
             user.save()
+         
 
             return Response({"status": "password changed successfully", "user": user.username}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -158,7 +164,7 @@ class UserDeleteView(APIView):
 
         user = UserModel.objects.get(id=request.data.get("id"))
         user.delete()
-
+      
         return Response({"success": True}, status=status.HTTP_200_OK)
 
 
@@ -638,14 +644,7 @@ class CheckUserState(APIView):
 
 
     
-def logger_is(request ,message,action_type):
-    url_data = {
-            'url': reverse('get-targetuser', request=request)
-        }
-    time_now = datetime.now()
-    userlog = UserLogger.objects.create(user = request.user, message=message, action =action_type, request_url = url_data['url'])
-    return True
-    
+
     
     
     

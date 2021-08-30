@@ -76,9 +76,10 @@ from django.db.models import Count
 
 class CountTargetUserDatewiseCountSerializer(serializers.ModelSerializer):
     target_user_count_by_date = serializers.SerializerMethodField(method_name = 'get_count')
+    leaked_user_count_is = serializers.SerializerMethodField(method_name = 'get_leaked')
     class Meta:
         model = Campaign
-        fields = ['campaign_name','target_user_count_by_date','campaign_opened_count']
+        fields = ['campaign_name','target_user_count_by_date','campaign_opened_count','leaked_user_count_is']
         
     
     def get_count(self, obj):
@@ -91,6 +92,17 @@ class CountTargetUserDatewiseCountSerializer(serializers.ModelSerializer):
             data["count"] = campaignstatus.get('total_count')
         
             data_is.append(data)
+       
         
-        return details
+        return data_is
+    
+    def get_leaked(self, obj):
+        targetuser_leaked = TargetUser.objects.filter(password_leaked_status=True).values('password_leaked_status').annotate(total_Leakedtargetuser_count =Count('password_leaked_status'))
+        leaked_data = []
+        for targetuser in targetuser_leaked:
+            data = targetuser.get('total_Leakedtargetuser_count')
+           
+            
+        return data
         
+    
