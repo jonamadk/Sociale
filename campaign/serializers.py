@@ -16,10 +16,17 @@ class CreateTargetUserSerializer(serializers.ModelSerializer):
 
 
 class GetTargetUserSerializer(serializers.ModelSerializer):
+    
+    
+
     class Meta:
         model = TargetUser
         fields = '__all__'
+        
+    
+ 
 
+    
 
 class CreateTargetUserGroupSerializer(serializers.ModelSerializer):
 
@@ -103,4 +110,38 @@ class CountTargetUserDatewiseCountSerializer(serializers.ModelSerializer):
             
         return data
         
+
+class GetLeakedUserReportSerializer(serializers.ModelSerializer):
+    campaign_name = serializers.SerializerMethodField(method_name = 'get_campaign')
+
     
+    
+    class Meta:
+        model = TargetUser
+        fields = ['id','email','browser', 'operating_sys','password_leaked_status','user_agent_data','leaked_password_credential', 'campaign_name', ]
+    
+    def get_campaign(self, obj):
+        targetusers = TargetUser.objects.filter(id = obj.id)
+        campaign_name_list = {}
+        
+        associated_campaign_list = []
+        opened_campaign_List = []
+        for targetuser in targetusers:
+            
+            associated_campaigns = Campaign.objects.filter(id__in = targetuser.associated_campaign_list.all())
+            opened_campaigns = Campaign.objects.filter(id__in = targetuser.opened_campaign_list.all())
+            for campaign in associated_campaigns:
+                
+                
+                associated_campaign_list.append(campaign.campaign_name)
+                campaign_name_list["assocaited"] = associated_campaign_list
+            for campaign in opened_campaigns:
+                campaigns={}
+                opened_campaign_List.append(campaign.campaign_name)
+                campaign_name_list["opened"] = opened_campaign_List
+
+        return campaign_name_list
+                
+            
+        
+        

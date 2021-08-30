@@ -867,7 +867,7 @@ class TargetuserReport(generics.ListAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, DjangoModelPermissions]
     queryset = TargetUser.objects.all()
-    serializer_class = GetTargetUserSerializer
+    serializer_class = GetLeakedUserReportSerializer
     pagination_class = Targetuserleakedpagination
     def get_queryset(self):
         '''

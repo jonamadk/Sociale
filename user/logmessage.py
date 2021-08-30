@@ -9,6 +9,8 @@ user_related_messages = {
     "user-auth-status-sms":" user has used sms based auth",
     "user-auth-status-email":" user has used email based auth",
     "user-auth-status-QR":" user has used QR based auth ",
+    "user-send-email-otp":" OTP has been send to the user ",
+    "user-otp-verify":"Verify OTP for user"
     
     
 }

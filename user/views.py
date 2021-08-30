@@ -342,7 +342,13 @@ class SendOTPInMailView(APIView):
                     # to:
                     [user.email]
 
+
                 )
+                try:
+                    loggerone_is(user,request, user_related_messages["user-send-email-otp"]+user.username, "Send OTP in email for login", "send-otp-mail")
+                except:
+                    return Response({"Msg":"Error in log creation"})
+        
 
                 return Response({"status": "Email Send"}, status=status.HTTP_200_OK)
             else:
@@ -386,6 +392,10 @@ class ForgetPasswordView(APIView):
                     [user.email]
 
                 )
+                try:
+                    loggerone_is(user,request, user_related_messages["user-send-email-otp"]+user.username, "Send email for forgot password", "forgot-password")
+                except:
+                    return Response({"Msg":"Error in log creation"})
 
                 return Response({"status": "OTP has been send"}, status=status.HTTP_200_OK)
 
@@ -415,6 +425,11 @@ class OTPVerifyForForgetPassword(APIView):
             user = UserModel.objects.get(email=data.get("email"))
             otp_code = user.otp_code
             if otp_code == data.get("otp_code"):
+                
+                try:
+                    loggerone_is(user,request, user_related_messages["user-otp-verify"]+user.username, "OTP Verification for forgot password", "otp-verify-forgot-password")
+                except:
+                    return Response({"Msg":"Error in log creation"})
 
                 return Response({"status": "OTP Verified"},
                                 status=status.HTTP_200_OK)
