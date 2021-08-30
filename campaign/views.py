@@ -311,7 +311,7 @@ class GetTargetUserGroupFromOrganizationView(APIView):
 class GetTargetUserGroupAllView(generics.ListAPIView):
 
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated, DjangoModelPermissions]
+    permission_classes = [IsAuthenticated]
 
     queryset = TargetUserGroup.objects.all()
     serializer_class = GetTargetUserGroupSerializer
@@ -320,7 +320,7 @@ class GetTargetUserGroupAllView(generics.ListAPIView):
 class UpdateTargetUserGroupView(generics.UpdateAPIView):
 
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated, DjangoModelPermissions]
+    permission_classes = [IsAuthenticated]
 
     queryset = TargetUserGroup.objects.all()
     serializer_class = GetTargetUserGroupSerializer
