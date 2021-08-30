@@ -80,7 +80,7 @@ class UserSignupView(APIView):
                     
                     try:
         
-                        logger_is(request, user.username+ user_related_messages["signup"], "added", "user-signup")
+                        logger_is(request, user.username+ user_related_messages["user-signup"], "Add user in UserModel", "user-signup")
                     except:
                         return Response({"Msg":"Error in log creation"})
                     return Response({"key": get_object_or_404(Token, user=user).key, "user": user.username},
@@ -118,6 +118,12 @@ class UserUpdateView(generics.UpdateAPIView):
     serializer_class = UserUpdateSerializer
 
     def get_object(self):
+        
+        try:
+            logger_is(self.request, self.request.user.username+user_related_messages["user-profile-update"], "User data change", "user-profile-update")
+        except:
+            return Response({"Msg":"Error in log creation"})
+        
         return UserModel.objects.get(username=self.request.user.username)
 
 
@@ -146,7 +152,10 @@ class UserProfilePasswordUpdateView(APIView):
             user.password = make_password(newpassword)
             user.save()
          
-
+            try:
+                logger_is(self.request, self.request.user.username+user_related_messages["user-password-update"], "User password has been updated", "user-password-update")
+            except:
+                return Response({"Msg":"Error in log creation"})
             return Response({"status": "password changed successfully", "user": user.username}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -158,12 +167,22 @@ class UserDeleteView(APIView):
     '''
 
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminUser, DjangoModelPermissions]
+    permission_classes = [IsAuthenticated, IsAdminUser]
 
     def delete(self, request, *args, **kwargs):
 
         user = UserModel.objects.get(id=request.data.get("id"))
+        name_is = user.username
+        print(name_is)
+        
+        
         user.delete()
+        try:
+            logger_is(request, name_is+user_related_messages["user-deletion"], "User has been deleted", "user-deletion")
+        except:
+            return Response({"Msg":"Error in log creation"})
+        
+        
       
         return Response({"success": True}, status=status.HTTP_200_OK)
 
@@ -187,8 +206,8 @@ class UserRetrieveView(generics.RetrieveAPIView):
 
 class UserSiginView(APIView):
 
-    authencation_class = [TokenAuthentication]
-    permission_class = [IsAuthenticated]
+    # authencation_class = [TokenAuthentication]
+    # permission_class = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         ''' 
@@ -214,8 +233,14 @@ class UserSiginView(APIView):
                 user.otp_code = otp_code_generator()
                 otp_code = user.otp_code
                 user.save()
-                return Response({"key": get_object_or_404(Token, user=user).key, "user": user.username},
+                
+                try:
+                    loggerone_is(user,request, user.username+user_related_messages["user-signin"], "Email and password has been authenticated", "user-signin")
+                except:
+                    return Response({"Msg":"Error in log creation"})
+                return Response({"success":True, "key": get_object_or_404(Token, user=user).key, "user": user.username},
                                 status=status.HTTP_200_OK)
+            
             else:
                 return Response({"status": "no user with such credentials"}, status=status.HTTP_403_FORBIDDEN)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

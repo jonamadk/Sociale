@@ -1,10 +1,11 @@
 user_related_messages = {
     
-    "signup":" has beenuser has been created!",
-    "signin":"Successfully signed in !! ",
-    "user-profile-update":"Successfully profile is update",
-    "user-password-update":"Password has been update !",
-    "user-deletion":"User has been deleted"
+    
+    "user-signup":" user has been created!",
+    "user-signin":" has been authenticated by email & permission",
+    "user-profile-update":" user successfully profile is updated",
+    "user-password-update":"  user's password has been updated !",
+    "user-deletion":" user has been deleted"
     
     
 }
@@ -17,10 +18,4 @@ campaign_related_messages = {
 }
 
 
-user_actions = {
-    "add":"User creation!",
-    "change":"Change",
-    "delte":"Delete"
-    
-}
 

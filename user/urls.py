@@ -4,10 +4,10 @@ from django.urls import path, include
 from .views import *
 
 user_crud_patterns = [
-    path("update/profile/", UserUpdateView.as_view()),
-    path("delete/", UserDeleteView.as_view()),
+    path("update/profile/", UserUpdateView.as_view(), name="user-profile-update"),
+    path("delete/", UserDeleteView.as_view(), name="user-deletion"),
     path("view/", UserRetrieveView.as_view()),
-    path("update/password/", UserProfilePasswordUpdateView.as_view()),
+    path("update/password/", UserProfilePasswordUpdateView.as_view(), name="user-password-update"),
     path("state/", CheckUserState.as_view())
 
 ]
@@ -16,8 +16,8 @@ user_crud_patterns = [
 urlpatterns = [
 
     path("signup/", UserSignupView.as_view(), name="user-signup"),
-    path("signin/", UserSiginView.as_view()),
-    path("signin/2f/", TwoFactorCheckandRoute.as_view()),
+    path("signin/", UserSiginView.as_view(), name='user-signin'),
+    path("signin/2f/", TwoFactorCheckandRoute.as_view(), name="check-auth-type"),
     path("users/", UserListView.as_view()),
     path("user/", include(user_crud_patterns)),
     path("email/", ForgetPasswordView.as_view()),

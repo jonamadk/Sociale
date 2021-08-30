@@ -4,7 +4,7 @@ from django.db.models import fields
 from rest_framework import serializers
 from .models import *
 from rest_framework.validators import UniqueValidator
-
+from django.db.models import Count
 
 class CreateTargetUserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(validators=[UniqueValidator(
@@ -70,8 +70,6 @@ class CSVUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = TargetUserCSV
         fields = ['file_name']
-
-from django.db.models import Count
 
 
 class CountTargetUserDatewiseCountSerializer(serializers.ModelSerializer):
