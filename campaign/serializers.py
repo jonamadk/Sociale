@@ -5,6 +5,9 @@ from rest_framework import serializers
 from .models import *
 from rest_framework.validators import UniqueValidator
 from django.db.models import Count
+from rest_framework import status
+
+
 
 
 class CreateTargetUserSerializer(serializers.ModelSerializer):
@@ -100,16 +103,15 @@ class CountTargetUserDatewiseCountSerializer(serializers.ModelSerializer):
             data_is.append(data_dict)
        
         
-        return data_is
+            return data_is
+        else:
+            return False
     
     def get_leaked(self, obj):
         targetuser_leaked = TargetUser.objects.filter(associated_campaign_list__id=obj.id, password_leaked_status=True).values('password_leaked_status').annotate(total_Leakedtargetuser_count =Count('password_leaked_status'))
-        leaked_data = []
-        for targetuser in targetuser_leaked:
-            data = targetuser.get('total_Leakedtargetuser_count')
-           
-            
-        return data
+   
+        return targetuser_leaked
+
         
 
 class GetLeakedUserReportSerializer(serializers.ModelSerializer):
