@@ -9,7 +9,8 @@ user_crud_patterns = [
     path("view/", UserRetrieveView.as_view()),
     path("update/password/", UserProfilePasswordUpdateView.as_view(), name="user-password-update"),
     path("state/", CheckUserState.as_view()),
-    path('log/', UserLogAPI.as_view())
+    path('log/', UserLogAPI.as_view()),
+    path('all/', UserListRetrieveAPI.as_view())
 
 ]
 

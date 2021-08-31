@@ -32,7 +32,7 @@ from datetime import datetime
 from user.logmessage import *
 from user.logger import *
 from campaign.serializers import *
-
+from campaign.pagination import *
 
 class UserSignupView(APIView):
 
@@ -695,34 +695,33 @@ class CheckUserState(APIView):
 
     
 
-# class LoggerAPI(APIView):
-#     authentication_classes = [TokenAuthentication]
-#     permission_classes = [IsAuthenticated]
-    
-#     def post(self, requests, *args, **kwargs):
-        
-#         userid = request.data.get("user_id")
-        
-#         user = UserModel.objects.get(id = userid)
-        
-#         return Response({"suvvess":True})
-        
          
 class UserLogAPI(generics.ListAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-    serializer_class = UserLogSerializer
+    
+    pagination = [UserLogReportPagination]
     queryset = UserLogger.objects.all()
+    serializer_class = UserLogSerializer
     
     
     def get_queryset(self):
         username= self.request.GET.get('username',None)
-        user = UserModel.objects.get(username= username)
+        
         if username:
+            user = UserModel.objects.get(username=username)
             return UserLogger.objects.filter(user__id = user.id)
         return UserLogger.objects.all()
         
             
+    
+    
+class UserListRetrieveAPI(generics.ListAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserSignupSerializer
+    pagination = [UserLogReportPagination]
+    queryset = UserModel.objects.all()
     
     
     
