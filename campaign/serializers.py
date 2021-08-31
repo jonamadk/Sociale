@@ -93,11 +93,11 @@ class CountTargetUserDatewiseCountSerializer(serializers.ModelSerializer):
         data_is = []
         details = CampaignStatus.objects.filter(campaign_id = obj.id).values('campaign_opened_date').annotate(total_count = Count('campaign_opened_date')) 
         for campaignstatus in details:
-            data = {}
-            data["date"] = campaignstatus.get('campaign_opened_date')
-            data["count"] = campaignstatus.get('total_count')
+            data_dict = {}
+            data_dict["date"] = campaignstatus.get('campaign_opened_date')
+            data_dict["count"] = campaignstatus.get('total_count')
         
-            data_is.append(data)
+            data_is.append(data_dict)
        
         
         return data_is
