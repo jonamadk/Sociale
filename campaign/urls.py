@@ -24,6 +24,7 @@ campaign = [
     path("list/", RetrieveAllCampaignsFromOrganization.as_view()),
     path("delete/", DeleteCamapaignView.as_view()),
     path("tor-test-one/", TestForTorOne.as_view()),
+    path('all/', CampaignListRetrieveAPI.as_view())
 
 ]
 

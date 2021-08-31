@@ -149,3 +149,7 @@ class UserLogSerializer(serializers.ModelSerializer):
         
         
     
+class RetrieveCamapaignSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Campaign
+        fields = ['campaign_name']

@@ -880,11 +880,11 @@ class TargetuserReport(generics.ListAPIView):
     
     
    
-# class CampaignListRetrieveAPI(generics.ListAPIView):
-#     authentication_classes = [TokenAuthentication]
-#     permission_classes = [IsAuthenticated]
-#     serializer_class =  
-#     queryset = UserModel.objects.all()
+class CampaignListRetrieveAPI(generics.ListAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class =  RetrieveCamapaignSerializer
+    queryset = Campaign.objects.all()
    
    
             
