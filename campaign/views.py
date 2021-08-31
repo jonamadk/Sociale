@@ -857,7 +857,6 @@ class LeakedTargetuserData(generics.ListAPIView):
     def get_queryset(self):
         campaign_id = self.request.GET.get('campaign',None)
         if campaign_id:
-            print(TargetUser.objects.filter(associated_campaign_list__id = campaign_id,password_leaked_status=True ).count())
             return TargetUser.objects.filter(associated_campaign_list__id = campaign_id,password_leaked_status=True )
         return TargetUser.objects.filter(password_leaked_status=True)
     
@@ -868,7 +867,7 @@ class TargetuserReport(generics.ListAPIView):
     permission_classes = [IsAuthenticated, DjangoModelPermissions]
     queryset = TargetUser.objects.all()
     serializer_class = GetLeakedUserReportSerializer
-    pagination_class = Targetuserleakedpagination
+    pagination_class = TargetuserReportPagination
     def get_queryset(self):
         '''
         GET Method for targetuser filtered by Campaign 

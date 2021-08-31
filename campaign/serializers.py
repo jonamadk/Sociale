@@ -6,6 +6,7 @@ from .models import *
 from rest_framework.validators import UniqueValidator
 from django.db.models import Count
 
+
 class CreateTargetUserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(validators=[UniqueValidator(
         TargetUser.objects.all())], max_length=None, required=True)
@@ -130,13 +131,10 @@ class GetLeakedUserReportSerializer(serializers.ModelSerializer):
             
             associated_campaigns = Campaign.objects.filter(id__in = targetuser.associated_campaign_list.all())
             opened_campaigns = Campaign.objects.filter(id__in = targetuser.opened_campaign_list.all())
-            for campaign in associated_campaigns:
-                
-                
+            for campaign in associated_campaigns: 
                 associated_campaign_list.append(campaign.campaign_name)
                 campaign_name_list["assocaited"] = associated_campaign_list
             for campaign in opened_campaigns:
-                campaigns={}
                 opened_campaign_List.append(campaign.campaign_name)
                 campaign_name_list["opened"] = opened_campaign_List
 
@@ -144,4 +142,10 @@ class GetLeakedUserReportSerializer(serializers.ModelSerializer):
                 
             
         
+class UserLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserLogger
+        fields = '__all__'
         
+        
+    

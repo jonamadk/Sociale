@@ -31,6 +31,8 @@ from campaign.models import *
 from datetime import datetime
 from user.logmessage import *
 from user.logger import *
+from campaign.serializers import *
+
 
 class UserSignupView(APIView):
 
@@ -450,6 +452,11 @@ class AddNewPassword(APIView):
             user.password = make_password(new_password)
             user.save()
 
+            try:
+                loggerone_is(user,request, user_related_messages["user-new-password"]+user.username, "Take new password ", "user-new-password")
+            except:
+                return Response({"Msg":"Error in log creation"})
+            
             return Response({"status": True, "msg": "Password updated !!"}, status=status.HTTP_200_OK)
 
         else:
@@ -478,6 +485,12 @@ class OTPVerifyView(APIView):
             user = UserModel.objects.get(id=request.user.id)
             otp_code = user.otp_code
             if otp_code == data.get("otp_code"):
+                
+                
+                try:
+                    loggerone_is(user,request, user_related_messages["user-otp-verify"]+user.username, "Verify user OTP ", "user-otp-verify")
+                except:
+                    return Response({"Msg":"Error in log creation"})
                 return Response({"status": "OTP Verified"},
                                 status=status.HTTP_200_OK)
             else:
@@ -695,12 +708,26 @@ class CheckUserState(APIView):
 #         return Response({"suvvess":True})
         
          
-
-
+class UserLogAPI(generics.ListAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserLogSerializer
+    queryset = UserLogger.objects.all()
+    
+    
+    def get_queryset(self):
+        user_id = self.request.GET.get('user_id',None)
+        if user_id:
+            return UserLogger.objects.filter(user__id = user_id)
+        return UserLogger.objects.all()
+        
+            
+    
+    
     
 
-    
-    
+
+        
     
     
     
