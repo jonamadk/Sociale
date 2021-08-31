@@ -725,15 +725,17 @@ class UserLogAPI(generics.ListAPIView):
             return UserLogger.objects.filter(user__id = user.id)
         return UserLogger.objects.all()
         
-            
-    
+        
     
 class UserListRetrieveAPI(generics.ListAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class =  AlluserdataSerializer
     queryset = UserModel.objects.all()
-    
+
+
+
+
     
     
 
