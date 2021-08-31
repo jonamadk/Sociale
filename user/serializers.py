@@ -100,3 +100,10 @@ class GetPhoneNumberFromEmailSerializer(serializers.ModelSerializer):
 
         model = UserModel
         fields = ["phonenumber"]
+
+
+
+class AlluserdataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserModel
+        fields = ['username', 'id']

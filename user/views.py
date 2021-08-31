@@ -719,7 +719,7 @@ class UserLogAPI(generics.ListAPIView):
 class UserListRetrieveAPI(generics.ListAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-    serializer_class = UserSignupSerializer
+    serializer_class =  AlluserdataSerializer
     pagination = [UserLogReportPagination]
     queryset = UserModel.objects.all()
     

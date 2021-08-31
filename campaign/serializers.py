@@ -145,7 +145,7 @@ class GetLeakedUserReportSerializer(serializers.ModelSerializer):
 class UserLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserLogger
-        fields = '__all__'
+        fields = "__all__"
         
         
     
