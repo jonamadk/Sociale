@@ -101,7 +101,7 @@ class UserListView(generics.ListAPIView):
         GET Method for viewing the user's  list.
     '''
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminUser, DjangoModelPermissions]
+    permission_classes = [IsAuthenticated, IsAdminUser]
     queryset = UserModel.objects.all()
     serializer_class = UserSignupSerializer
 
@@ -579,6 +579,10 @@ class DisableTwoFactorAuthView(APIView):
                     user.email_two_factor_auth = False
                     user.email_and_sms_two_factor_auth = False
                     user.save()
+                    try:
+                        logger_is(request, user.username+user_related_messages["disabale-authentication"], "Disable user authentication type ", "user-set-auth-type")
+                    except:
+                        return Response({"Msg":"Error in log creation"})
 
                     return Response({"Email based 2f auth status": user.email_two_factor_auth, "Totp based 2f auth status": user.totp_two_factor_auth, "Email and sms based 2f": user.email_and_sms_two_factor_auth}, status=status.HTTP_200_OK)
 
