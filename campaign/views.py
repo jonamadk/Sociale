@@ -290,8 +290,7 @@ class GetTargetUserGroupListView(generics.ListAPIView):
         
 
         user = UserModel.objects.get(id=self.request.user.id)
-        print("=>>>>>>>>>>>>>>>>>>>>>>")
-        logger_is(user, "Get the targetuser group_list", "get the all targetuser list")
+     
         return TargetUserGroup.objects.get(user=user)
 
 
@@ -402,7 +401,7 @@ class AddTargetUserEmailView(APIView):
                         email=email, target_user_uuid=uuid.uuid4())
                     targetuser.targetusergroup.add(targetusergroup_is)
             
-            logger_is(request,"Get the targetuser group_list", "get the all targetuser list")
+    
             
             return Response({"status": True}, status=status.HTTP_201_CREATED)
         except:
@@ -421,7 +420,7 @@ class GetTargetUserListView(APIView):
             id=request.data.get('group_id'))
         targetuser = TargetUser.objects.filter(targetusergroup=targetusergroup)
         serializer = GetTargetUserSerializer(targetuser, many=True)
-        logger_is(request, "some", "some")
+      
 
         return Response({"status": True, "payload": serializer.data})
 
