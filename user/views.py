@@ -485,8 +485,6 @@ class OTPVerifyView(APIView):
             user = UserModel.objects.get(id=request.user.id)
             otp_code = user.otp_code
             if otp_code == data.get("otp_code"):
-                
-                
                 try:
                     loggerone_is(user,request, user_related_messages["user-otp-verify"]+user.username, "Verify user OTP ", "user-otp-verify")
                 except:
@@ -524,6 +522,11 @@ class SelectTwoFactorAuthView(APIView):
                     user.totp_two_factor_auth = False
                     user.email_and_sms_two_factor_auth = False
                     user.save()
+                    print("reached--->>>>>>>>>>>>>>")
+                    try:
+                        logger_is(request, user.username+user_related_messages["user-set-auth-type-email"], "Set user authentication type ", "user-set-auth-type")
+                    except:
+                        return Response({"Msg":"Error in log creation"})
                     return Response({"msg": "Enabled email based auth", "Email auth status": user.email_two_factor_auth}, status=status.HTTP_200_OK)
 
                 elif totp == True:
@@ -531,6 +534,10 @@ class SelectTwoFactorAuthView(APIView):
                     user.totp_two_factor_auth = True
                     user.email_and_sms_two_factor_auth = False
                     user.save()
+                    try:
+                        logger_is(request, user.username+user_related_messages["user-set-auth-type-QR"], "Set user authentication type ", "user-set-auth-type")
+                    except:
+                        return Response({"Msg":"Error in log creation"})
                     return Response({"msg": "Enabled totp based auth", "Totp auth status": user.totp_two_factor_auth}, status=status.HTTP_200_OK)
 
                 else:
@@ -538,6 +545,10 @@ class SelectTwoFactorAuthView(APIView):
                     user.totp_two_factor_auth = False
                     user.email_and_sms_two_factor_auth = True
                     user.save()
+                    try:
+                        logger_is(request, user.username+user_related_messages["user-set-auth-type-sms"], "Set user authentication type ", "user-set-auth-type")
+                    except:
+                        return Response({"Msg":"Error in log creation"})
                     return Response({"msg": "Enabled SMS based auth", "Email and Sms auth status": user.email_and_sms_two_factor_auth}, status=status.HTTP_200_OK)
 
             except:
@@ -700,9 +711,10 @@ class UserLogAPI(generics.ListAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     
-    pagination = [UserLogReportPagination]
+    
     queryset = UserLogger.objects.all()
     serializer_class = UserLogSerializer
+    pagination_class = UserLogReportPagination
     
     
     def get_queryset(self):
@@ -720,7 +732,6 @@ class UserListRetrieveAPI(generics.ListAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class =  AlluserdataSerializer
-    pagination = [UserLogReportPagination]
     queryset = UserModel.objects.all()
     
     

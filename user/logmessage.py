@@ -11,7 +11,13 @@ user_related_messages = {
     "user-auth-status-QR":" user has used QR based auth ",
     "user-send-email-otp":" OTP has been send to the user ",
     "user-otp-verify":"Verify OTP for user",
-    "user-new-password":"New password has been set "
+    "user-new-password":"New password has been set ",
+    "user-set-auth-type-sms":" has set the authentication type to sms",
+    "user-set-auth-type-email":" has set the authentication type to email",
+    "user-set-auth-type-QR":" has set the authentication type to QR",
+    
+    
+    
     
     
 }

@@ -25,7 +25,7 @@ urlpatterns = [
     path("email/", ForgetPasswordView.as_view(), name="forgot-password"),
     path("verify/otp/", OTPVerifyView.as_view(), name="user-otp-verify"),
     path("disable/twofactor/", DisableTwoFactorAuthView.as_view()),
-    path("select/twofactor/", SelectTwoFactorAuthView.as_view()),
+    path("select/twofactor/", SelectTwoFactorAuthView.as_view(), name="user-set-auth-type"),
     path("status/auth/", UserAuthStatusView.as_view()),
     path("check/", SendOTPInMailView.as_view(), name="send-otp-mail"),  
     path("pnumber/", GetPhoneNumberFromEmailView.as_view()),
