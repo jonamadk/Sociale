@@ -716,9 +716,10 @@ class UserLogAPI(generics.ListAPIView):
     
     
     def get_queryset(self):
-        user_id = self.request.GET.get('user_id',None)
-        if user_id:
-            return UserLogger.objects.filter(user__id = user_id)
+        username= self.request.GET.get('username',None)
+        user = UserModel.objects.get(username= username)
+        if username:
+            return UserLogger.objects.filter(user__id = user.id)
         return UserLogger.objects.all()
         
             
