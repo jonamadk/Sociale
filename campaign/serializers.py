@@ -82,7 +82,7 @@ class CSVUploadSerializer(serializers.ModelSerializer):
         model = TargetUserCSV
         fields = ['file_name']
 
-
+from collections import Counter
 class CountTargetUserDatewiseCountSerializer(serializers.ModelSerializer):
     target_user_count_by_date = serializers.SerializerMethodField(method_name = 'get_count')
     leaked_user_count_is = serializers.SerializerMethodField(method_name = 'get_leaked')
@@ -108,11 +108,13 @@ class CountTargetUserDatewiseCountSerializer(serializers.ModelSerializer):
             return data_is
     
     def get_leaked(self, obj):
-        targetuser_leaked = TargetUser.objects.filter(associated_campaign_list__id=obj.id, password_leaked_status=True).values('password_leaked_status').annotate(total_Leakedtargetuser_count =Count('password_leaked_status'))
-   
-        return targetuser_leaked
+        data_is = []
+        targetuser_leaked = TargetUser.objects.filter(associated_campaign_list__id=obj.id, password_leaked_status=True)
+        for targetuser in targetuser_leaked:
+            data_is.append(targetuser)
 
-        
+        leaked_user_count_is =len(data_is)
+        return leaked_user_count_is
 
 class GetLeakedUserReportSerializer(serializers.ModelSerializer):
     campaign_name = serializers.SerializerMethodField(method_name = 'get_campaign')
