@@ -9,7 +9,7 @@ from user.models import UserModel
 
 class TargetUserGroup(models.Model):
 
-    group_name = models.CharField(max_length=254, null=True, blank=True)
+    group_name = models.CharField(max_length=254, null=True, blank=True, unique= True)
     department = models.CharField(max_length=254, null=True, blank=True)
     organization = models.CharField(max_length=254, null=True, blank=True)
     user = models.ForeignKey(UserModel, on_delete=models.CASCADE)
@@ -20,7 +20,7 @@ class TargetUserGroup(models.Model):
 
 class Campaign(models.Model):
 
-    campaign_name = models.CharField(max_length=254, null=True, blank=True)
+    campaign_name = models.CharField(max_length=254, null=True, blank=True, unique=True)
     campaign_title = models.CharField(max_length=250, null=True, blank=True)
     templateresource = models.ForeignKey(
         TemplateResource, on_delete=models.CASCADE)

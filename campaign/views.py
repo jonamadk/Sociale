@@ -73,9 +73,6 @@ class CreateCampaignView(APIView):
                                                    "campaign_title"),
                                                templateresource=data.get(
                                                    "templateresource"),
-                                               start_date=data.get(
-                                                   "start_date"),
-                                               end_date=data.get("end_date"),
                                                target_users_mail_list=request.data.get(
                                                    "target_user_mail_list"),
                                                user=user)
