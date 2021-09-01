@@ -13,7 +13,8 @@ campaign = [
     path('retrieve/', RetrieveCampaignView.as_view()),
     path('target_mail_list/', AddTemplateReceiverList.as_view()),
     path("send/", SendTemplateMailView.as_view()),
-    path("schedule/", ScheduleCamapaignView.as_view()),
+    # path("schedule/", ScheduleCamapaignView.as_view()),
+    path("schedule/",ScheduleCampaignEmail.as_view()),
     path('send/image_load/<str:targetuser_uuid>/<int:camp_id>/',
          image_load, name='image_load'),
     path('ua_data/', GetUserAgentData.as_view()),
@@ -24,7 +25,8 @@ campaign = [
     path("list/", RetrieveAllCampaignsFromOrganization.as_view()),
     path("delete/", DeleteCamapaignView.as_view()),
     path("tor-test-one/", TestForTorOne.as_view()),
-    path('all/', CampaignListRetrieveAPI.as_view())
+    path('all/', CampaignListRetrieveAPI.as_view()),
+    
 
 ]
 
