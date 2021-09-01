@@ -736,6 +736,7 @@ class UserListRetrieveAPI(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class =  AlluserdataSerializer
     queryset = UserModel.objects.all()
+    pagination_class = UserLogReportPagination
 
 
 
