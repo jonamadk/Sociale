@@ -76,7 +76,7 @@ class TargetUserCSV(models.Model):
     activated = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.file_name
+        return str(self.file_name)
 
 
 class CampaignStatus(models.Model):

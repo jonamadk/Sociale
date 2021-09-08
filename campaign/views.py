@@ -4,6 +4,7 @@ from typing import Counter
 from django.core.exceptions import AppRegistryNotReady
 from django.db.models import manager
 from django.db.models.expressions import F
+from django.urls.conf import path
 from group import serializer
 import campaign
 from django.contrib.auth import authenticate
@@ -380,6 +381,14 @@ class AddTargetUserEmailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
+        '''
+        POST Method to add the target users in 
+        targetuser group
+        
+        Post list of email to be added to the group_id 
+        of the targetuser group
+        
+        '''
 
         try:
         
@@ -405,8 +414,15 @@ class AddTargetUserEmailView(APIView):
                     targetuser = TargetUser.objects.create(
                         email=email, target_user_uuid=uuid.uuid4())
                     targetuser.targetusergroup.add(targetusergroup_is)
-            
+
+                    # email_to_check = email
+
+           
+                    # leak_data = find_leaks(email_to_check.strip())
+                    # leak_data = leak_data[1]
     
+                    # targetuser.leaked_password_credential = leak_data['password']
+                    # targetuser.save()
             
             return Response({"status": True}, status=status.HTTP_201_CREATED)
         except:
@@ -516,14 +532,11 @@ class CSVUploadView(APIView):
 
         '''
         serializer = CSVUploadSerializer(data=request.data)
-
         if serializer.is_valid():
             data = serializer.validated_data
             targetusercsv = TargetUserCSV.objects.create(
                 file_name=data.get("file_name"))
             targetuserfile = TargetUserCSV.objects.get(activated=False)
-            print(targetuserfile)
-
             with open(targetuserfile.file_name.path, 'r') as f:
                 reader = csv.reader(f)
                 for i, row in enumerate(reader):
@@ -532,12 +545,24 @@ class CSVUploadView(APIView):
                     else:
                         row = "".join(row)
                         email = row
-                        targetusergroup = TargetUserGroup.objects.get(
+                        targetusergroup_is = TargetUserGroup.objects.get(
                             id=request.data.get('id'))
-                        targetuser = TargetUser.objects.create(
-                            targetusergroup=targetusergroup)
-                        targetuser.email = email
-                        targetuser.save()
+                        try:
+                            print(email)
+                            targetuser = TargetUser.objects.get(email = email)
+                        except:
+                            
+                            targetuser= TargetUser.objects.create(email = email, target_user_uuid = uuid.uuid4())
+                            targetuser.targetusergroup.add(targetusergroup_is)
+                            
+                            # email_to_check = email
+
+           
+                            # leak_data = find_leaks(email_to_check.strip())
+                            # leak_data = leak_data[1]
+         
+                            # targetuser.leaked_password_credential = leak_data['password']
+                            # targetuser.save()
 
                 targetuserfile.activated = True
                 targetuserfile.save()
@@ -784,7 +809,7 @@ class GetUserAgentData(APIView):
                 for campaignstatobject in campaignstat:
                     campaignstatobject.campaign_date = date.today()
                     campaignstatobject.save()
-            else:
+            else:  
                 CampaignStatus.objects.create(campaign = campaign ,targetuser = targetuser_is, campaign_opened_date = date.today())            
                 return Response({"success": True, "leaked_is":"leak_data"}, status=status.HTTP_200_OK)
         except:
