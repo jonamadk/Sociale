@@ -686,7 +686,7 @@ def image_load(request, targetuser_uuid, camp_id):
         return Response({"success":False}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class TargetUserCredentials(APIView):
+class TargetUserBrowserCredentials(APIView):
 
     def post(self, request, *args, **kwargs):
 
@@ -908,6 +908,11 @@ class CountTargetUserDatewiseCountView(generics.ListAPIView):
     pagination_class = CamapaignDashboardpagination
     
     def get_queryset(self):
+        '''
+        GET method that takes campaign id as query parameter to 
+        return the total campaign open count
+        
+        '''
         campaign_id = self.request.GET.get('campaign',None)
         if campaign_id:
             return Campaign.objects.filter(id=campaign_id)
@@ -923,6 +928,13 @@ class LeakedTargetuserData(generics.ListAPIView):
     pagination_class = Targetuserleakedpagination
     
     def get_queryset(self):
+        '''
+        GET Method with campaign id as query parameter to return the
+        the list of targetuser
+        whose password_leaked_status is True,
+        and without any query parameter
+        
+        '''
         campaign_id = self.request.GET.get('campaign',None)
         if campaign_id:
             return TargetUser.objects.filter(associated_campaign_list__id = campaign_id,password_leaked_status=True )
@@ -936,10 +948,14 @@ class TargetuserReport(generics.ListAPIView):
     queryset = TargetUser.objects.all()
     serializer_class = GetLeakedUserReportSerializer
     pagination_class = TargetuserReportPagination
+    
     def get_queryset(self):
         '''
-        GET Method for targetuser filtered by Campaign 
-        and with no filter
+        GET Method with campaign id as query parameter to
+        return list of targetuser associated campaign,
+        the list of targetuser opened campaign,
+        the possible exploit occurence according to os and browser,
+        and other target user related data
         '''
         campaign_id = self.request.GET.get('campaign',None)
         if campaign_id:
@@ -947,8 +963,15 @@ class TargetuserReport(generics.ListAPIView):
         return TargetUser.objects.all()
     
     
+    
+    
+    
    
 class CampaignListRetrieveAPI(generics.ListAPIView):
+    '''
+    Retrieves All the Campaigns.
+    
+    '''
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class =  RetrieveCamapaignSerializer
@@ -975,6 +998,12 @@ class ScheduleCampaignEmail(APIView):
     
     
     def patch(self, request, *args, **kwargs):
+        '''
+        Patch method to assign the 
+        email sending date (start_date) and time (start_time)
+        with email detail message(campaign_email_detail_message) and 
+        email title message (camapign_email_title_message).
+        '''
         
         campaign_id = request.data.get("campaign_id")
         campaign = Campaign.objects.get(id=campaign_id)

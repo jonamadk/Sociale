@@ -1,5 +1,7 @@
-aple = ''
-if len(aple)==0:
+
+l= []
+
+if len(l) == 0:
     print("yes")
 else:
     print("no")
