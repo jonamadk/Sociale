@@ -127,12 +127,10 @@ class CountTargetUserDatewiseCountSerializer(serializers.ModelSerializer):
 class GetLeakedUserReportSerializer(serializers.ModelSerializer):
     campaign_name = serializers.SerializerMethodField(method_name = 'get_campaign')
     
-
-    
     
     class Meta:
         model = TargetUser
-        fields = ['id','email','browser', 'operating_sys','password_leaked_status', 'password_credential', 'email_credential','user_agent_data','leaked_password_credential', 'campaign_name','possible_exploit']
+        fields = ['id','email','browser', 'operating_sys','password_leaked_status', 'password_credential', 'email_credential','user_agent_data','leaked_password_credential', 'campaign_name']
     
     def get_campaign(self, obj):
         targetusers = TargetUser.objects.filter(id = obj.id)
@@ -192,7 +190,6 @@ class GetTargetUserExploitSerializer(serializers.ModelSerializer):
         targetusers = TargetUser.objects.filter(id = obj.id )
         possible_exploit_list = []
         for targetuser in targetusers:
-            print(targetuser.email)
             try:
                 user_agent = parse(targetuser.user_agent_data)
            
@@ -221,7 +218,6 @@ class GetTargetUserExploitSerializer(serializers.ModelSerializer):
                         import re
                         description = re.split("-", exploit_details)
                         possible_exploit_is = description[0]
-                        print(possible_exploit_is)
                         possible_exploit_list.append(possible_exploit_is)
                             
                     return possible_exploit_list
