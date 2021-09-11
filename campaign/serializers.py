@@ -126,7 +126,7 @@ class CountTargetUserDatewiseCountSerializer(serializers.ModelSerializer):
 
 class GetLeakedUserReportSerializer(serializers.ModelSerializer):
     campaign_name = serializers.SerializerMethodField(method_name = 'get_campaign')
-    possible_exploit = serializers.SerializerMethodField(method_name = 'find_possible_exploit')
+    
 
     
     
@@ -156,49 +156,6 @@ class GetLeakedUserReportSerializer(serializers.ModelSerializer):
      
    
         
-    def find_possible_exploit(self , obj):
-        
-        targetusers = TargetUser.objects.filter(id = obj.id )
-        possible_exploit_list = []
-        for targetuser in targetusers:
-            user_agent = parse(targetuser.user_agent_data)
-            
-            for key , value in platform.items():
-                if user_agent.os.family in platform[key]:
-                    os_is = key
-             
-            for key , value in browser.items():
-                if user_agent.browser.family in browser[key]:
-                    browser_is = key
-                                    
-            try:
-                
-                expl_data_version_match = ExploitData.objects.all().filter(
-                platform=os_is, browser__icontains=browser_is, browser_version__iexact=user_agent.browser.version_string)
-                        
-                if len(expl_data_version_match) ==0:
-                    expl_data_match = ExploitData.objects.all().filter(
-                                platform=os_is, browser__icontains=browser_is)
-                    expl_data = expl_data_match
-                else:
-                    expl_data = expl_data_version_match
-                for data in expl_data:
-                    exploit_details = data.description
-                    import re
-                    description = re.split("-", exploit_details)
-                    possible_exploit_is = description[0]
-                    print(possible_exploit_is)
-                    possible_exploit_list.append(possible_exploit_is)
-                        
-                return possible_exploit_list
-            except:
-                return possible_exploit_list
-            
-            
-            
-            
-        
-        
         
         
         
@@ -219,4 +176,60 @@ class RetrieveCamapaignSerializer(serializers.ModelSerializer):
 
 
 
+class GetTargetUserExploitSerializer(serializers.ModelSerializer):
+    possible_exploit = serializers.SerializerMethodField(method_name = 'find_possible_exploit')
+    
+    
+    class Meta:
+        model = TargetUser
+        fields =['id','email','password_leaked_status','operating_sys','browser','leaked_password_credential','email_credential','password_credential','possible_exploit']
+    
+    
+    
+        
+    def find_possible_exploit(self , obj):
+        
+        targetusers = TargetUser.objects.filter(id = obj.id )
+        possible_exploit_list = []
+        for targetuser in targetusers:
+            print(targetuser.email)
+            try:
+                user_agent = parse(targetuser.user_agent_data)
+           
+            
+                for key , value in platform.items():
+                    if user_agent.os.family in platform[key]:
+                        os_is = key
+                
+                for key , value in browser.items():
+                    if user_agent.browser.family in browser[key]:
+                        browser_is = key
+            
+                                
+                try:
+                    expl_data_version_match = ExploitData.objects.all().filter(
+                    platform=os_is, browser__icontains=browser_is, browser_version__iexact=user_agent.browser.version_string)
+                            
+                    if len(expl_data_version_match) ==0:
+                        expl_data_match = ExploitData.objects.all().filter(
+                                    platform=os_is, browser__icontains=browser_is)
+                        expl_data = expl_data_match
+                    else:
+                        expl_data = expl_data_version_match
+                    for data in expl_data:
+                        exploit_details = data.description
+                        import re
+                        description = re.split("-", exploit_details)
+                        possible_exploit_is = description[0]
+                        print(possible_exploit_is)
+                        possible_exploit_list.append(possible_exploit_is)
+                            
+                    return possible_exploit_list
+                except:
+                    return possible_exploit_list
+            except:
+                pass 
+                
+                
+            
         

@@ -1020,6 +1020,26 @@ class ScheduleCampaignEmail(APIView):
         except:
             return Response({"success":True}, status=status.HTTP_400_BAD_REQUEST)
             
+
+
+
+class RetrieveTargetUser(generics.ListAPIView):
+    
+    authentication_classes =[TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = GetTargetUserExploitSerializer
+    queryset = TargetUser.objects.all()
+    pagination_class = TargetuserReportPagination
+    
+    def get_queryset(self):
+        
+        
+        targetuser = self.request.GET.get('targetuser',None)
+        if targetuser:
+            return TargetUser.objects.filter(id = targetuser)
+        
+        return TargetUser.objects.all()
+        
     
 
 

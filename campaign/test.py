@@ -1,7 +1,5 @@
+from datetime import datetime
+import time
 
-l= []
-
-if len(l) == 0:
-    print("yes")
-else:
-    print("no")
+current_time = time.strftime("%H:%M")
+print(current_time)

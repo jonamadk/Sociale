@@ -59,6 +59,7 @@ targetuser = [
     path('get/', GetTargetUserListView.as_view(), name = 'get-targetuser'),
     path('update/', UpdateTargetUserListView.as_view()),
     path('list/', GetAllTargetUsersList.as_view()),
+    path('detail/', RetrieveTargetUser.as_view())
    
 ]
 
