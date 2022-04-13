@@ -7,3 +7,4 @@
   - Object level user roles and permission
   - Dynamic template generation for phishing site
   - One pixel email tracking implementation
+  - Dark Web dump checking
