@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from phonenumber_field.modelfields import PhoneNumberField
 
 
+
 class UserModel(AbstractUser):
 
     phonenumber = PhoneNumberField(unique=True)
@@ -13,3 +14,19 @@ class UserModel(AbstractUser):
         default=False, null=True, blank=True)
     email_and_sms_two_factor_auth = models.BooleanField(
         default=False, null=True, blank=True)
+    
+    
+    def __str__(self):
+        return self.username
+
+
+
+
+   
+    
+    
+    
+
+        
+
+

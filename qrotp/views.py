@@ -33,10 +33,6 @@ class EnableQRBasedTOTP(APIView):
             mfa_hash.save()
             uri = pyotp.totp.TOTP(mfa_hash.mfa_hash).provisioning_uri(
                 user.email, issuer_name="SocialIE")
-            
-
-            # qrcode_uri = "https://www.google.com/chart?chs=200x200&chld=M|0&cht=qr&chl={}".format(
-            #     uri)
 
             return Response({"status": "QR Created", 'qrcode': uri}, status=status.HTTP_201_CREATED)
 

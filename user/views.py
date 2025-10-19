@@ -1,3 +1,4 @@
+from campaign import admin
 from qrotp.views import TOTPVerifyView
 from django.shortcuts import render
 from django.db.models.query import QuerySet
@@ -25,7 +26,13 @@ import pyotp
 from django.contrib.auth.models import Group
 from django.core.mail import EmailMultiAlternatives
 from group.permissions import has_permission
-
+from django.contrib.admin.models import LogEntry
+from campaign.models import *
+from datetime import datetime
+from user.logmessage import *
+from user.logger import *
+from campaign.serializers import *
+from campaign.pagination import *
 
 class UserSignupView(APIView):
 
@@ -63,7 +70,7 @@ class UserSignupView(APIView):
                                                 )
                 token = Token.objects.create(user=user)
                 mfa_hash = MFHash.objects.create(user=user)
-
+               
                 try:
                     groups = request.data.get('groups')
 
@@ -72,13 +79,18 @@ class UserSignupView(APIView):
                         group_obj = Group.objects.get(id=items)
 
                         user.groups.add(group_obj)
-
+                    
+                    try:
+        
+                        logger_is(request, user.username+ user_related_messages["user-signup"], "Add user in UserModel", "user-signup")
+                    except:
+                        return Response({"Msg":"Error in log creation"})
                     return Response({"key": get_object_or_404(Token, user=user).key, "user": user.username},
                                     status=status.HTTP_200_OK)
 
                 except Exception as e:
                     return Response({"status": "User created but permission group is not added"}, status=status.HTTP_501_NOT_IMPLEMENTED)
-
+            
             return Response({"status": "Password didn't match"}, status=status.HTTP_403_FORBIDDEN)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -89,7 +101,7 @@ class UserListView(generics.ListAPIView):
         GET Method for viewing the user's  list.
     '''
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminUser, DjangoModelPermissions]
+    permission_classes = [IsAuthenticated, IsAdminUser]
     queryset = UserModel.objects.all()
     serializer_class = UserSignupSerializer
 
@@ -108,6 +120,12 @@ class UserUpdateView(generics.UpdateAPIView):
     serializer_class = UserUpdateSerializer
 
     def get_object(self):
+        
+        try:
+            logger_is(self.request, self.request.user.username+user_related_messages["user-profile-update"], "User data change", "user-profile-update")
+        except:
+            return Response({"Msg":"Error in log creation"})
+        
         return UserModel.objects.get(username=self.request.user.username)
 
 
@@ -135,7 +153,11 @@ class UserProfilePasswordUpdateView(APIView):
                 return Response({"old_password": ["Old Password didn't match"]}, status=status.HTTP_403_FORBIDDEN)
             user.password = make_password(newpassword)
             user.save()
-
+         
+            try:
+                logger_is(self.request, self.request.user.username+user_related_messages["user-password-update"], "User password has been updated", "user-password-update")
+            except:
+                return Response({"Msg":"Error in log creation"})
             return Response({"status": "password changed successfully", "user": user.username}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -147,13 +169,23 @@ class UserDeleteView(APIView):
     '''
 
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminUser, DjangoModelPermissions]
+    permission_classes = [IsAuthenticated, IsAdminUser]
 
     def delete(self, request, *args, **kwargs):
 
         user = UserModel.objects.get(id=request.data.get("id"))
+        name_is = user.username
+        print(name_is)
+        
+        
         user.delete()
-
+        try:
+            logger_is(request, name_is+user_related_messages["user-deletion"], "User has been deleted", "user-deletion")
+        except:
+            return Response({"Msg":"Error in log creation"})
+        
+        
+      
         return Response({"success": True}, status=status.HTTP_200_OK)
 
 
@@ -176,8 +208,8 @@ class UserRetrieveView(generics.RetrieveAPIView):
 
 class UserSiginView(APIView):
 
-    authencation_class = [TokenAuthentication]
-    permission_class = [IsAuthenticated]
+    # authencation_class = [TokenAuthentication]
+    # permission_class = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         ''' 
@@ -203,8 +235,14 @@ class UserSiginView(APIView):
                 user.otp_code = otp_code_generator()
                 otp_code = user.otp_code
                 user.save()
-                return Response({"key": get_object_or_404(Token, user=user).key, "user": user.username},
+                
+                try:
+                    loggerone_is(user,request, user.username+user_related_messages["user-signin"], "Email and password has been authenticated", "user-signin")
+                except:
+                    return Response({"Msg":"Error in log creation"})
+                return Response({"success":True, "key": get_object_or_404(Token, user=user).key, "user": user.username},
                                 status=status.HTTP_200_OK)
+            
             else:
                 return Response({"status": "no user with such credentials"}, status=status.HTTP_403_FORBIDDEN)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -229,6 +267,10 @@ class TwoFactorCheckandRoute(APIView):
             phonenumber = user.phonenumber
             otp_code = user.otp_code
             send_sms(otp_code, phonenumber)
+            try:
+                loggerone_is(user,request, user.username+user_related_messages["user-auth-status-sms"], "Check two factor auth type", "check-auth-type")
+            except:
+                return Response({"Msg":"Error in log creation"})
 
             return Response({"Status": " SMS Based", "user": user.username},
                             status=status.HTTP_200_OK)
@@ -253,9 +295,19 @@ class TwoFactorCheckandRoute(APIView):
                 [user.email]
 
             )
+            try:
+                loggerone_is(user,request, user.username+user_related_messages["user-auth-status-email"], "Check two factor auth type", "check-auth-type")
+            except:
+                return Response({"Msg":"Error in log creation"})
+
             return Response({"status": "Email Based"}, status=status.HTTP_200_OK)
 
         elif user.totp_two_factor_auth == True:
+            try:
+                loggerone_is(user,request, user.username+user_related_messages["user-auth-status-QR"], "Check two factor auth type", "check-auth-type")
+            except:
+                return Response({"Msg":"Error in log creation"})
+
 
             return Response({'message': 'Totp Implemented'}, status=status.HTTP_200_OK)
 
@@ -292,7 +344,13 @@ class SendOTPInMailView(APIView):
                     # to:
                     [user.email]
 
+
                 )
+                try:
+                    loggerone_is(user,request, user_related_messages["user-send-email-otp"]+user.username, "Send OTP in email for login", "send-otp-mail")
+                except:
+                    return Response({"Msg":"Error in log creation"})
+        
 
                 return Response({"status": "Email Send"}, status=status.HTTP_200_OK)
             else:
@@ -336,6 +394,10 @@ class ForgetPasswordView(APIView):
                     [user.email]
 
                 )
+                try:
+                    loggerone_is(user,request, user_related_messages["user-send-email-otp"]+user.username, "Send email for forgot password", "forgot-password")
+                except:
+                    return Response({"Msg":"Error in log creation"})
 
                 return Response({"status": "OTP has been send"}, status=status.HTTP_200_OK)
 
@@ -365,6 +427,11 @@ class OTPVerifyForForgetPassword(APIView):
             user = UserModel.objects.get(email=data.get("email"))
             otp_code = user.otp_code
             if otp_code == data.get("otp_code"):
+                
+                try:
+                    loggerone_is(user,request, user_related_messages["user-otp-verify"]+user.username, "OTP Verification for forgot password", "otp-verify-forgot-password")
+                except:
+                    return Response({"Msg":"Error in log creation"})
 
                 return Response({"status": "OTP Verified"},
                                 status=status.HTTP_200_OK)
@@ -385,6 +452,11 @@ class AddNewPassword(APIView):
             user.password = make_password(new_password)
             user.save()
 
+            try:
+                loggerone_is(user,request, user_related_messages["user-new-password"]+user.username, "Take new password ", "user-new-password")
+            except:
+                return Response({"Msg":"Error in log creation"})
+            
             return Response({"status": True, "msg": "Password updated !!"}, status=status.HTTP_200_OK)
 
         else:
@@ -413,6 +485,10 @@ class OTPVerifyView(APIView):
             user = UserModel.objects.get(id=request.user.id)
             otp_code = user.otp_code
             if otp_code == data.get("otp_code"):
+                try:
+                    loggerone_is(user,request, user_related_messages["user-otp-verify"]+user.username, "Verify user OTP ", "user-otp-verify")
+                except:
+                    return Response({"Msg":"Error in log creation"})
                 return Response({"status": "OTP Verified"},
                                 status=status.HTTP_200_OK)
             else:
@@ -446,6 +522,11 @@ class SelectTwoFactorAuthView(APIView):
                     user.totp_two_factor_auth = False
                     user.email_and_sms_two_factor_auth = False
                     user.save()
+                    print("reached--->>>>>>>>>>>>>>")
+                    try:
+                        logger_is(request, user.username+user_related_messages["user-set-auth-type-email"], "Set user authentication type ", "user-set-auth-type")
+                    except:
+                        return Response({"Msg":"Error in log creation"})
                     return Response({"msg": "Enabled email based auth", "Email auth status": user.email_two_factor_auth}, status=status.HTTP_200_OK)
 
                 elif totp == True:
@@ -453,6 +534,10 @@ class SelectTwoFactorAuthView(APIView):
                     user.totp_two_factor_auth = True
                     user.email_and_sms_two_factor_auth = False
                     user.save()
+                    try:
+                        logger_is(request, user.username+user_related_messages["user-set-auth-type-QR"], "Set user authentication type ", "user-set-auth-type")
+                    except:
+                        return Response({"Msg":"Error in log creation"})
                     return Response({"msg": "Enabled totp based auth", "Totp auth status": user.totp_two_factor_auth}, status=status.HTTP_200_OK)
 
                 else:
@@ -460,6 +545,10 @@ class SelectTwoFactorAuthView(APIView):
                     user.totp_two_factor_auth = False
                     user.email_and_sms_two_factor_auth = True
                     user.save()
+                    try:
+                        logger_is(request, user.username+user_related_messages["user-set-auth-type-sms"], "Set user authentication type ", "user-set-auth-type")
+                    except:
+                        return Response({"Msg":"Error in log creation"})
                     return Response({"msg": "Enabled SMS based auth", "Email and Sms auth status": user.email_and_sms_two_factor_auth}, status=status.HTTP_200_OK)
 
             except:
@@ -490,6 +579,10 @@ class DisableTwoFactorAuthView(APIView):
                     user.email_two_factor_auth = False
                     user.email_and_sms_two_factor_auth = False
                     user.save()
+                    try:
+                        logger_is(request, user.username+user_related_messages["disabale-authentication"], "Disable user authentication type ", "user-set-auth-type")
+                    except:
+                        return Response({"Msg":"Error in log creation"})
 
                     return Response({"Email based 2f auth status": user.email_two_factor_auth, "Totp based 2f auth status": user.totp_two_factor_auth, "Email and sms based 2f": user.email_and_sms_two_factor_auth}, status=status.HTTP_200_OK)
 
@@ -612,3 +705,52 @@ class CheckUserState(APIView):
 
         else:
             return Response({"suceess": False}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+    
+
+         
+class UserLogAPI(generics.ListAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    
+    queryset = UserLogger.objects.all()
+    serializer_class = UserLogSerializer
+    pagination_class = UserLogReportPagination
+    
+    
+    def get_queryset(self):
+        username= self.request.GET.get('username',None)
+        
+        if username:
+            user = UserModel.objects.get(username=username)
+            return UserLogger.objects.filter(user__id = user.id)
+        return UserLogger.objects.all()
+        
+        
+    
+class UserListRetrieveAPI(generics.ListAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class =  AlluserdataSerializer
+    queryset = UserModel.objects.all()
+    pagination_class = UserLogReportPagination
+
+
+
+
+
+
+    
+    
+
+
+        
+    
+    
+    
+    
+    
+    
