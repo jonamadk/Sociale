@@ -47,7 +47,8 @@ class CreateCampaignView(APIView):
 
     @has_permission('campaign.add_campaign')
     def post(self, request, *args, **kwargs):
-
+        '''
+        POST Method for creating the campaign'''
         serializer = CreateCampaignSerializer(data=request.data)
         user = UserModel.objects.get(id=request.user.id)
 
@@ -82,7 +83,9 @@ class RetrieveCampaignListView(APIView):
 
     @has_permission('campaign.view_campaign')
     def get(self, request, *args, **kwargs):
-
+        '''
+        GET Method for retrieving the campaign list according to user
+        '''
         try:
             user = UserModel.objects.get(id=request.user.id)
             campaign = Campaign.objects.filter(user=user)
@@ -95,7 +98,7 @@ class RetrieveCampaignListView(APIView):
 
 
 class RetrieveAllCampaignsFromOrganization(generics.ListAPIView):
-
+    '''GET Method for retrieving all campaigns from the organization'''
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, DjangoModelPermissions]
 

@@ -4,6 +4,9 @@ from .views import *
 from django.conf.urls.static import static
 from django.conf import settings
 
+
+
+##### Campaign URLs
 campaign = [
     path('create/', CreateCampaignView.as_view()),
     path('update/', UpdateCampaignView.as_view()),
@@ -28,7 +31,7 @@ campaign = [
 
 ]
 
-
+##### Target User Group URLs
 group = [
     path('create/', CreateTargetUserGroupView.as_view()),
     path('get/', GetTargetUserGroupListView.as_view()),
@@ -39,7 +42,7 @@ group = [
 
 ]
 
-
+###### Target User URLs`
 targetuser = [
     path('create/', AddTargetUserEmailView.as_view()),
     path('dump/', CSVUploadView.as_view()),
@@ -47,6 +50,7 @@ targetuser = [
     path('update/', UpdateTargetUserListView.as_view()),
 ]
 
+##### URL Patterns
 urlpatterns = [
     path('targetusergroup/', include(group)),
     path('targetuser/', include(targetuser)),
