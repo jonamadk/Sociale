@@ -3,6 +3,8 @@ from django.urls import path, include
 
 from .views import *
 
+
+### User CRUD URLs
 user_crud_patterns = [
     path("update/profile/", UserUpdateView.as_view(), name="user-profile-update"),
     path("delete/", UserDeleteView.as_view(), name="user-deletion"),
@@ -14,6 +16,8 @@ user_crud_patterns = [
 
 ]
 
+
+### User URLs
 
 urlpatterns = [
 

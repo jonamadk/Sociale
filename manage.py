@@ -5,7 +5,11 @@ import sys
 
 
 def main():
-    """Run administrative tasks."""
+    """ server initiator
+
+    Raises:
+        ImportError: if Django is not installed
+    """
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'socialie.settings')
     try:
         from django.core.management import execute_from_command_line
