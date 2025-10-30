@@ -14,3 +14,9 @@ build
 .eggs
 *.log
 *.pot           
+migrations/
+*.sqlite3
+*.db
+.DS_Store
+.vscode/
+.idea/
