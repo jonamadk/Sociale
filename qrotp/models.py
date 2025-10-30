@@ -4,6 +4,7 @@ from user.models import UserModel
 
 
 class MFHash(models.Model):
+    '''Model to store MFA hash information'''
     mfa_hash = models.CharField(max_length=50, null=True, blank=True)
     user = models.OneToOneField(UserModel, on_delete=models.CASCADE)
 
