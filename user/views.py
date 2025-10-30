@@ -613,6 +613,8 @@ class GetPhoneNumberFromEmailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
+        '''
+        GET Method to get phone number from email'''
 
         user = UserModel.objects.get(id=request.user.id)
         serializer = GetPhoneNumberFromEmailSerializer(user)
@@ -671,6 +673,7 @@ class CheckUserState(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
+        '''POST Method to check user state'''
 
         token_is = request.data.get("token")
         username_is = request.data.get("username")
@@ -722,6 +725,7 @@ class UserLogAPI(generics.ListAPIView):
     
     
     def get_queryset(self):
+        '''GET Method to filter user logs by username'''
         username= self.request.GET.get('username',None)
         
         if username:

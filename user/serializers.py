@@ -5,7 +5,7 @@ from rest_framework.validators import UniqueValidator
 
 
 class UserSignupSerializer(serializers.ModelSerializer):
-
+    '''Serializer for user signup'''
     email = serializers.EmailField(validators=[UniqueValidator(
         UserModel.objects.all())], max_length=None, required=True)
     password = serializers.CharField(
