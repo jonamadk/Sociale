@@ -20,6 +20,7 @@ from django.shortcuts import render
 import json
 
 
+
 class UsersGroupCreateView(APIView):
 
     authentication_classes = [TokenAuthentication]
@@ -180,11 +181,19 @@ class GetUserGroupandPermissions(APIView):
 
 
 class AdjustedPermissions(APIView):
-
+ 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get(self, request, *args, **kwargs):
+        """ 
+        Get all permissions excluding default django permissions
+        Args:
+            request (_type_): permission
+
+        Returns:
+            _type_: dict
+        """
 
         permission = Permission.objects.all()
         serializer = PermissionSerializer(permission, many=True)
@@ -203,7 +212,7 @@ class AdjustedPermissions(APIView):
 
         return Response({"permissions": granted_permission})
 
-
+### Get Permissions from Group
 class GetPermissionsFromGroup(APIView):
 
     authentication_classes = [TokenAuthentication]
@@ -232,7 +241,7 @@ class GetPermissionsFromGroup(APIView):
 
             return Response({"success": False}, status=status.HTTP_501_NOT_IMPLEMENTED)
 
-
+### Test Email
 class TestEmail(APIView):
 
     authentication_classes = [TokenAuthentication]
@@ -269,7 +278,7 @@ class TestEmail(APIView):
 
             return Response({"message": "Email is not associated to account"}, status=status.HTTP_400_BAD_REQUEST)
 
-
+### Edit User Group Association
 class EditUserGroupAssociationView(APIView):
 
     authentication_classes = [TokenAuthentication]
