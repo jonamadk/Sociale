@@ -55,7 +55,7 @@ paths:
       description: 'POST Method for the new user registeration
 
 
-        Checks if the incoming request data are validated and
+        Checks if the incoming request data are valid and
 
         creates the user.'
       operationId: signup_create
