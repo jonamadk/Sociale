@@ -15,7 +15,7 @@ import pyotp
 
 
 class EnableQRBasedTOTP(APIView):
-
+    '''API View to enable QR-based TOTP for users'''
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -41,7 +41,7 @@ class EnableQRBasedTOTP(APIView):
 
 
 class TOTPVerifyView(APIView):
-
+    '''API View to verify TOTP during user sign-in'''
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 

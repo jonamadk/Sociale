@@ -7,6 +7,7 @@ from user.models import UserModel
 
 
 class TemplateResource(models.Model):
+    '''Model to store template resource information'''
     headerBackgroundColor = models.CharField(
         max_length=100, blank=True, null=True)
     headerFontColor = models.CharField(max_length=100, blank=True, null=True)
