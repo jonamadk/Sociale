@@ -5,6 +5,8 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 
+
+##### Campaign URLs
 campaign = [
     path('create/', CreateCampaignView.as_view()),
     path('update/', UpdateCampaignView.as_view()),
@@ -34,14 +36,7 @@ campaign = [
 dashboard = [
 
 
-        path('browser/', GetBrowserandOSData.as_view()),
-        path('get-campaign-report/', CountTargetUserDatewiseCountView.as_view(), name = 'get-campaign-report'),
-        path('targetuser-leaked-status/', LeakedTargetuserData.as_view()),
-        path('targetuser-report/', TargetuserReport.as_view()),
-        
-    
-             ]
-
+##### Target User Group URLs
 group = [
     path('create/', CreateTargetUserGroupView.as_view()),
     path('get/', GetTargetUserGroupListView.as_view()),
@@ -52,7 +47,7 @@ group = [
 
 ]
 
-
+###### Target User URLs`
 targetuser = [
     path('create/', AddTargetUserEmailView.as_view()),
     path('dump/', CSVUploadView.as_view()),
@@ -63,6 +58,7 @@ targetuser = [
    
 ]
 
+##### URL Patterns
 urlpatterns = [
     path('targetusergroup/', include(group)),
     path('targetuser/', include(targetuser)),

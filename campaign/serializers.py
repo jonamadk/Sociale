@@ -6,12 +6,8 @@ from django.db.models import fields
 from rest_framework import serializers
 from .models import *
 from rest_framework.validators import UniqueValidator
-from django.db.models import Count
-from rest_framework import status
-from user_agents import parse
-from .exploit_match import *
-from exploit_data.models import ExploitData
 
+#### Target User Serializers
 class CreateTargetUserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(validators=[UniqueValidator(
         TargetUser.objects.all())], max_length=None, required=True)
@@ -20,7 +16,7 @@ class CreateTargetUserSerializer(serializers.ModelSerializer):
         model = TargetUser
         fields = ['email']
 
-
+#### Get Target User Serializer
 class GetTargetUserSerializer(serializers.ModelSerializer):
     
     
@@ -32,8 +28,7 @@ class GetTargetUserSerializer(serializers.ModelSerializer):
     
  
 
-    
-
+#### Target User Group Serializers
 class CreateTargetUserGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -41,13 +36,13 @@ class CreateTargetUserGroupSerializer(serializers.ModelSerializer):
         model = TargetUserGroup
         fields = ['group_name', 'department', 'organization']
 
-
+#### Get Target User Group Serializer
 class GetTargetUserGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = TargetUserGroup
         fields = '__all__'
 
-
+#### Campaign Serializers
 class CreateCampaignSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -55,7 +50,7 @@ class CreateCampaignSerializer(serializers.ModelSerializer):
         fields = ['campaign_name', 'campaign_title',
                   'templateresource', 'start_date', 'end_date']
 
-
+#### Update Campaign Serializer
 class UpdateCampaignSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -63,14 +58,15 @@ class UpdateCampaignSerializer(serializers.ModelSerializer):
         fields = ['campaign_name', 'campaign_title', 'templateresource',
                   'start_date', 'end_date', 'id', 'targetusergroup']
 
-
+#### Update Campaign Detail Serializer
 class UpdateCampaignDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Campaign
         fields = ['campaign_name', 'campaign_title',
                   'templateresource', 'start_date', 'end_date', 'id']
-
+        
+#### Get Campaign Serializer
 
 class GetCampaignSerializer(serializers.ModelSerializer):
 
@@ -78,7 +74,7 @@ class GetCampaignSerializer(serializers.ModelSerializer):
         model = Campaign
         fields = '__all__'
 
-
+#### CSV Upload Serializer
 class CSVUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = TargetUserCSV

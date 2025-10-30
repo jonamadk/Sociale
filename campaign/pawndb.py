@@ -10,6 +10,8 @@ from requests import ConnectionError
 
 
 def find_leaks(email):
+    '''Find leaks for a given email using PwnDB'''
+    
     url = "http://pwndb2am4tzkvold.onion/"
     username = email
     domain = "%"
@@ -35,6 +37,7 @@ def find_leaks(email):
 
 
 def parse_pwndb_response(text):
+    '''Parse the response from PwnDB and extract leaked emails'''
 
     if "Array" not in text:
         return None
