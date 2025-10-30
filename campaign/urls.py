@@ -15,21 +15,26 @@ campaign = [
     path('retrieve/', RetrieveCampaignView.as_view()),
     path('target_mail_list/', AddTemplateReceiverList.as_view()),
     path("send/", SendTemplateMailView.as_view()),
-    path("schedule/", ScheduleCamapaignView.as_view()),
+    # path("schedule/", ScheduleCamapaignView.as_view()),
+    path("schedule/",ScheduleCampaignEmail.as_view()),
     path('send/image_load/<str:targetuser_uuid>/<int:camp_id>/',
          image_load, name='image_load'),
     path('ua_data/', GetUserAgentData.as_view()),
-    path('check/targetuser_leak/', TargetUserCredentials.as_view()),
+    path('check/targetuser_leak/', TargetUserBrowserCredentials.as_view()),
     path('validate/template/', ValidateTemplate.as_view()),
     path("update/detail/", UpdateCampaignDetailView.as_view()),
     path("update/mail_list/", UpdateCampaignMailListView.as_view()),
     path("list/", RetrieveAllCampaignsFromOrganization.as_view()),
     path("delete/", DeleteCamapaignView.as_view()),
     path("tor-test-one/", TestForTorOne.as_view()),
-
-
-
+    path('all/', CampaignListRetrieveAPI.as_view()),
+    
 ]
+
+
+
+dashboard = [
+
 
 ##### Target User Group URLs
 group = [
@@ -46,13 +51,19 @@ group = [
 targetuser = [
     path('create/', AddTargetUserEmailView.as_view()),
     path('dump/', CSVUploadView.as_view()),
-    path('get/', GetTargetUserListView.as_view()),
+    path('get/', GetTargetUserListView.as_view(), name = 'get-targetuser'),
     path('update/', UpdateTargetUserListView.as_view()),
+    path('list/', GetAllTargetUsersList.as_view()),
+    path('detail/', RetrieveTargetUser.as_view())
+   
 ]
 
 ##### URL Patterns
 urlpatterns = [
     path('targetusergroup/', include(group)),
     path('targetuser/', include(targetuser)),
-    path('campaign/', include(campaign))
+    path('campaign/', include(campaign)),
+    path('dashboard/', include(dashboard))
+    
+    
 ]

@@ -31,12 +31,12 @@ urlpatterns = [
     path('', include('template.urls')),
     path('', include('campaign.urls')),
     path('', include('exploit_data.urls')),
-    path('openapi', get_schema_view(
+    path('openapi/', get_schema_view(
          title="SocialE API's",
          description="API Endpoints of SocialE",
          version="1.0.0"
          ), name='openapi-schema'),
-    path('', TemplateView.as_view(
+    path('swagger/', TemplateView.as_view(
         template_name='swagger.html',
         extra_context={'schema_url': 'openapi-schema'}
     ), name='swagger-ui'),

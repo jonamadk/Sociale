@@ -4,6 +4,7 @@ from functools import wraps
 from rest_framework.response import Response
 from django.core.exceptions import PermissionDenied
 
+from rest_framework.permissions import DjangoModelPermissions
 
 def has_permission(permission):
     def has_permission_decorator(func):
@@ -15,3 +16,5 @@ def has_permission(permission):
             return func(*args, **kwargs)
         return has_permission_wrapper
     return has_permission_decorator
+
+
